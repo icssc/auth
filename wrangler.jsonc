@@ -2,37 +2,46 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "auth",
     "main": "src/index.ts",
-    "compatibility_date": "2025-10-16"
-    // "compatibility_flags": [
-    //   "nodejs_compat"
-    // ],
-    // "vars": {
-    //   "MY_VAR": "my-variable"
-    // },
-    // "kv_namespaces": [
-    //   {
-    //     "binding": "MY_KV_NAMESPACE",
-    //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    //   }
-    // ],
-    // "r2_buckets": [
-    //   {
-    //     "binding": "MY_BUCKET",
-    //     "bucket_name": "my-bucket"
-    //   }
-    // ],
-    // "d1_databases": [
-    //   {
-    //     "binding": "MY_DB",
-    //     "database_name": "my-database",
-    //     "database_id": ""
-    //   }
-    // ],
-    // "ai": {
-    //   "binding": "AI"
-    // },
-    // "observability": {
-    //   "enabled": true,
-    //   "head_sampling_rate": 1
-    // }
+    "compatibility_date": "2025-10-16",
+    "kv_namespaces": [
+        {
+            "binding": "AUTH_KV_AUTHCODES",
+            "id": "4d00717afb7c49c889720e25cd949836",
+            "remote": true
+        },
+        {
+            "binding": "AUTH_KV_ACCESSTOKENS",
+            "id": "4a71f1474434440d9583b786cbec3ba2",
+            "remote": true
+        },
+        {
+            "binding": "AUTH_KV_REFRESHTOKENS",
+            "id": "a35018a5ca97452e85fa8c176da9fd3d",
+            "remote": true
+        },
+        {
+            "binding": "AUTH_KV_SESSIONS",
+            "id": "6271ff01d1174d8ea1a7aa5b9a4d8e7c",
+            "remote": true
+        },
+        {
+            "binding": "AUTH_KV_KEYS",
+            "id": "e59eb162e4bf46a4bd36ed7c9d2358a4",
+            "remote": true
+        }
+    ],
+    "vars": {
+        "ISSUER": "https://auth.yourdomain.com",
+        "TOKEN_TTL_SECONDS": 3600,
+        "CODE_TTL_SECONDS": 300,
+        "REFRESH_TTL_SECONDS": 2592000,
+        "SESSION_TTL_SECONDS": 86400
+    },
+    "d1_databases": [
+        {
+            "binding": "AUTH_DB",
+            "database_name": "auth",
+            "database_id": "d00cde6e-e65f-47e0-b689-b4af7590349b"
+        }
+    ]
 }
