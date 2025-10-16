@@ -7,7 +7,7 @@ export const KeyPairSchema = z.object({
         n: z.string(),
         e: z.string(),
         kid: z.string(),
-    }),
+    }).passthrough(),
     privateJwk: z.object({
         kty: z.string(),
         n: z.string(),
@@ -19,5 +19,5 @@ export const KeyPairSchema = z.object({
         dq: z.string(),
         qi: z.string(),
         kid: z.string(),
-    }),
+    }).passthrough(),
 });

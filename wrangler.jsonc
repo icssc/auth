@@ -43,8 +43,6 @@
         "CODE_TTL_SECONDS": 300,
         "REFRESH_TTL_SECONDS": 2592000,
         "SESSION_TTL_SECONDS": 86400,
-        "GOOGLE_CLIENT_ID": "YOUR_GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET": "YOUR_GOOGLE_CLIENT_SECRET",
         "GOOGLE_REDIRECT_URI": "https://auth.icssc.club/callback/google"
     },
     "d1_databases": [
@@ -54,5 +52,12 @@
             "database_id": "d00cde6e-e65f-47e0-b689-b4af7590349b",
             "migrations_dir": "drizzle/migrations"
         }
-    ]
+    ],
+    "observability": {
+        "logs": {
+            "enabled": false,
+            "head_sampling_rate": 1,
+            "invocation_logs": true
+        }
+    }
 }
