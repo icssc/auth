@@ -3,6 +3,7 @@
     "name": "auth",
     "main": "src/index.ts",
     "compatibility_date": "2025-10-16",
+    "compatibility_flags": ["nodejs_compat"],
     "kv_namespaces": [
         {
             "binding": "AUTH_KV_AUTHCODES",
@@ -31,7 +32,7 @@
         }
     ],
     "vars": {
-        "ISSUER": "https://auth.yourdomain.com",
+        "ISSUER": "http://localhost:3000",
         "TOKEN_TTL_SECONDS": 3600,
         "CODE_TTL_SECONDS": 300,
         "REFRESH_TTL_SECONDS": 2592000,
@@ -41,7 +42,8 @@
         {
             "binding": "AUTH_DB",
             "database_name": "auth",
-            "database_id": "d00cde6e-e65f-47e0-b689-b4af7590349b"
+            "database_id": "d00cde6e-e65f-47e0-b689-b4af7590349b",
+            "migrations_dir": "drizzle/migrations"
         }
     ]
 }

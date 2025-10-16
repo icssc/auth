@@ -4,14 +4,25 @@
     "scripts": {
         "dev": "wrangler dev",
         "deploy": "wrangler deploy --minify",
-        "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+        "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "wrangler d1 migrations apply AUTH_DB --remote",
+        "db:migrate:local": "wrangler d1 migrations apply AUTH_DB --local",
+        "db:seed": "wrangler d1 execute AUTH_DB --remote --file=./drizzle/seed.sql",
+        "db:seed:local": "wrangler d1 execute AUTH_DB --local --file=./drizzle/seed.sql",
+        "db:studio": "drizzle-kit studio"
     },
     "dependencies": {
+        "dotenv": "^17.2.3",
+        "drizzle-orm": "^0.44.6",
         "hono": "^4.9.12",
         "jose": "^6.1.0"
     },
     "devDependencies": {
         "@biomejs/biome": "2.2.6",
+        "@types/node": "^24.7.2",
+        "drizzle-kit": "^0.31.5",
+        "tsx": "^4.20.6",
         "typescript": "^5.9.3",
         "wrangler": "^4.43.0"
     }
