@@ -17,7 +17,9 @@ export async function ensureKey(
         }
 
         // If not found, generate new keypair
-        const { publicKey, privateKey } = await generateKeyPair("RS256");
+        const { publicKey, privateKey } = await generateKeyPair("RS256", {
+            extractable: true,
+        });
         const kid = crypto.randomUUID();
         const publicJwk = await exportJWK(publicKey);
         const privateJwk = await exportJWK(privateKey);
