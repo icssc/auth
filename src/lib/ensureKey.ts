@@ -8,7 +8,7 @@ export async function ensureKey(
     const existing = await env.AUTH_KV_KEYS.get("current", "json");
     if (existing) {
         const { data, error } = await tryCatch(
-            KeyPairSchema.parseAsync(JSON.parse(existing as string))
+            KeyPairSchema.parseAsync(existing)
         );
 
         if (!error) {
