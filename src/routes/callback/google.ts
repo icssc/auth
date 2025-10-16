@@ -16,7 +16,7 @@ const StateDataSchema = z.object({
     scope: z.string(),
 });
 
-app.get("/callback/google", async (c) => {
+app.get("/", async (c) => {
     const { code, state: stateParam, error } = c.req.query();
 
     if (error) {

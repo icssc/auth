@@ -27,8 +27,8 @@ const StateDataSchema = z.object({
 });
 
 app.get("/", async (c) => {
-    const body = await c.req.parseBody();
-    const parsed = AuthorizeQuerySchema.safeParse(body);
+    const query = c.req.query();
+    const parsed = AuthorizeQuerySchema.safeParse(query);
     if (!parsed.success) {
         return c.json({ error: "invalid_request" }, 400);
     }

@@ -11,7 +11,7 @@ const TokenRequestSchema = z.object({
     grant_type: z.literal("authorization_code"),
     code: z.string(),
     redirect_uri: z.string().url(),
-    client_id: z.string(),
+    client_id: z.string().optional(),
     code_verifier: z.string(),
 });
 
