@@ -2,11 +2,17 @@ import { Hono } from "hono";
 import { ensureKey } from "@/lib/ensureKey";
 import authorizeRoutes from "@/routes/authorize";
 import callbackRoutes from "@/routes/callback";
+import logoutRoutes from "@/routes/logout";
+import tokenRoutes from "@/routes/token";
+import userinfoRoutes from "@/routes/userinfo";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.route("/authorize", authorizeRoutes);
 app.route("/callback", callbackRoutes);
+app.route("/token", tokenRoutes);
+app.route("/userinfo", userinfoRoutes);
+app.route("/logout", logoutRoutes);
 
 app.get("/.well-known/openid-configuration", (c) => {
     const iss = c.env.ISSUER;

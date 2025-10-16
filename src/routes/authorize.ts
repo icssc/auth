@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getDb } from "@/db";
 import { clients } from "@/db/schema";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
-import { tryCatch } from "@/lib/try-catch";
+import type { AuthCodeSchema } from "@/lib/schemas/authcode";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -27,15 +27,14 @@ const StateDataSchema = z.object({
 });
 
 app.get("/", async (c) => {
-    const { data, error } = await tryCatch(
-        AuthorizeQuerySchema.parseAsync(c.req.query())
-    );
-
-    if (error) {
-        return c.json({ error: "invalid_request", details: error }, 400);
+    const body = await c.req.parseBody();
+    const parsed = AuthorizeQuerySchema.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: "invalid_request" }, 400);
     }
 
-    const { client_id, redirect_uri, state, code_challenge, scope } = data;
+    const { client_id, redirect_uri, state, code_challenge, scope } =
+        parsed.data;
 
     const db = getDb(c.env.AUTH_DB);
     const client = await db
@@ -83,21 +82,18 @@ app.get("/", async (c) => {
     }
 
     const code = crypto.randomUUID();
-    await c.env.AUTH_KV_AUTHCODES.put(
-        code,
-        JSON.stringify({
-            user_id: session.user_id,
-            client_id,
-            redirect_uri,
-            code_challenge,
-            scope,
-            created_at: Date.now(),
-        }),
-        {
-            expirationTtl:
-                Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10) || 300,
-        }
-    );
+    const authCode = {
+        user_id: session.user_id,
+        client_id,
+        redirect_uri,
+        code_challenge,
+        scope,
+        created_at: Date.now(),
+    } satisfies z.infer<typeof AuthCodeSchema>;
+    await c.env.AUTH_KV_AUTHCODES.put(code, JSON.stringify(authCode), {
+        expirationTtl:
+            Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10) || 300,
+    });
 
     const redirectUrl = new URL(redirect_uri);
     redirectUrl.searchParams.set("code", code);

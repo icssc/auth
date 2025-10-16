@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
+import type { AuthCodeSchema } from "@/lib/schemas/authcode";
 import { tryCatch } from "@/lib/try-catch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -101,7 +102,7 @@ app.get("/callback/google", async (c) => {
         code_challenge: stateData.code_challenge,
         scope: stateData.scope,
         created_at: Date.now(),
-    };
+    } satisfies z.infer<typeof AuthCodeSchema>;
 
     await c.env.AUTH_KV_AUTHCODES.put(authCode, JSON.stringify(codeData), {
         expirationTtl:
