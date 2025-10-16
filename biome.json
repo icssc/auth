@@ -20,8 +20,7 @@
         "rules": {
             "recommended": false,
             "correctness": { "noUnusedVariables": "warn" }
-        },
-        "includes": ["**/*.ts", "**/*.tsx"]
+        }
     },
     "javascript": {
         "formatter": {
@@ -38,7 +37,10 @@
     },
     "html": { "formatter": { "selfCloseVoidElements": "always" } },
     "assist": {
-        "enabled": true,
-        "actions": { "source": { "organizeImports": "on" } }
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
     }
 }

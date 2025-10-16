@@ -17,7 +17,6 @@ export const clients = sqliteTable("clients", {
 // Users
 export const users = sqliteTable("users", {
     id: text("id").primaryKey(),
-    username: text("username").notNull().unique(),
     pwSha256: text("pw_sha256"), // nullable for federated IDs
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
