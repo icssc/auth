@@ -19,7 +19,6 @@ app.get("/.well-known/openid-configuration", (c) => {
         issuer: iss,
         authorization_endpoint: `${iss}/authorize`,
         token_endpoint: `${iss}/token`,
-        userinfo_endpoint: `${iss}/userinfo`,
         jwks_uri: `${iss}/jwks.json`,
         scopes_supported: ["openid", "profile", "email"],
         response_types_supported: ["code"],

@@ -51,6 +51,8 @@ app.post("/", async (c) => {
     const now = Math.floor(Date.now() / 1000);
     const idToken = await new SignJWT({
         sub: authCode.user_id,
+        email: authCode.email,
+        name: authCode.name,
         aud: client_id,
         iss: c.env.ISSUER,
         iat: now,
