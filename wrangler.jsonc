@@ -39,8 +39,7 @@
         "REFRESH_TTL_SECONDS": 2592000,
         "SESSION_TTL_SECONDS": 86400,
         "GOOGLE_REDIRECT_URI": "https://auth.icssc.club/callback/google",
-        "GOOGLE_CLIENT_ID": "SECRET",
-        "GOOGLE_CLIENT_SECRET": "SECRET"
+        "GOOGLE_CLIENT_ID": "307305155433-2hojkb6tgl16c6qpsf40dfhst29av5hm.apps.googleusercontent.com"
     },
     "observability": {
         "logs": {
@@ -48,5 +47,6 @@
             "head_sampling_rate": 1,
             "invocation_logs": true
         }
-    }
+    },
+    "keep_vars": true
 }
