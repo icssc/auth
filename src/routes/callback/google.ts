@@ -97,7 +97,7 @@ app.get("/", async (c) => {
     const response = c.redirect(redirectUrl.toString(), 302);
     response.headers.set(
         "Set-Cookie",
-        `sid=${sessionId}; Domain=auth.icssc.club; HttpOnly; SameSite=Lax; Max-Age=${sessionTtl}; Path=/`
+        `sid=${sessionId}; Domain=auth.icssc.club; HttpOnly; Secure; SameSite=None; Max-Age=${sessionTtl}; Path=/`
     );
     return response;
 });

@@ -3,6 +3,7 @@ import { ensureKey } from "@/lib/ensureKey";
 import authorizeRoutes from "@/routes/authorize";
 import callbackRoutes from "@/routes/callback";
 import logoutRoutes from "@/routes/logout";
+import sessionRoutes from "@/routes/session";
 import tokenRoutes from "@/routes/token";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -11,6 +12,7 @@ app.route("/authorize", authorizeRoutes);
 app.route("/callback", callbackRoutes);
 app.route("/token", tokenRoutes);
 app.route("/logout", logoutRoutes);
+app.route("/session", sessionRoutes);
 
 app.get("/.well-known/openid-configuration", (c) => {
     const iss = c.env.ISSUER;
