@@ -59,6 +59,8 @@ app.get("/", async (c) => {
     const code = crypto.randomUUID();
     const authCode = {
         user_id: session.user_id,
+        email: session.email,
+        name: session.name,
         client_id,
         redirect_uri,
         code_challenge,

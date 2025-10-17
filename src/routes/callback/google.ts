@@ -1,9 +1,7 @@
 import { Hono } from "hono";
 import * as z from "zod";
-import { getDb } from "@/db";
-import { users } from "@/db/schema";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
-import type { AuthCodeSchema } from "@/lib/schemas/authcode";
+import type { AuthCode } from "@/lib/schemas/authcode";
 import { tryCatch } from "@/lib/try-catch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -63,25 +61,6 @@ app.get("/", async (c) => {
     const userInfo = userInfoResult.data;
     const userId = `google_${userInfo.id}`;
 
-    const db = getDb(c.env.AUTH_DB);
-    await db
-        .insert(users)
-        .values({
-            id: userId,
-            name: userInfo.name,
-            email: userInfo.email,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-            target: users.id,
-            set: {
-                name: userInfo.name,
-                email: userInfo.email,
-                updatedAt: new Date(),
-            },
-        });
-
     const sessionId = crypto.randomUUID();
     const sessionData = {
         user_id: userId,
@@ -97,12 +76,14 @@ app.get("/", async (c) => {
     const authCode = crypto.randomUUID();
     const codeData = {
         user_id: userId,
+        email: userInfo.email,
+        name: userInfo.name,
         client_id: stateData.client_id,
         redirect_uri: stateData.redirect_uri,
         code_challenge: stateData.code_challenge,
         scope: stateData.scope,
         created_at: Date.now(),
-    } satisfies z.infer<typeof AuthCodeSchema>;
+    } satisfies AuthCode;
 
     await c.env.AUTH_KV_AUTHCODES.put(authCode, JSON.stringify(codeData), {
         expirationTtl:

@@ -63,6 +63,8 @@ app.post("/", async (c) => {
         accessToken,
         JSON.stringify({
             user_id: authCode.user_id,
+            email: authCode.email,
+            name: authCode.name,
             scope: authCode.scope,
             exp: now + Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
         }),

@@ -22,11 +22,6 @@
             "remote": true
         },
         {
-            "binding": "AUTH_KV_REFRESHTOKENS",
-            "id": "a35018a5ca97452e85fa8c176da9fd3d",
-            "remote": true
-        },
-        {
             "binding": "AUTH_KV_SESSIONS",
             "id": "6271ff01d1174d8ea1a7aa5b9a4d8e7c",
             "remote": true
@@ -47,14 +42,6 @@
         "GOOGLE_CLIENT_ID": "SECRET",
         "GOOGLE_CLIENT_SECRET": "SECRET"
     },
-    "d1_databases": [
-        {
-            "binding": "AUTH_DB",
-            "database_name": "auth",
-            "database_id": "d00cde6e-e65f-47e0-b689-b4af7590349b",
-            "migrations_dir": "drizzle/migrations"
-        }
-    ],
     "observability": {
         "logs": {
             "enabled": true,
