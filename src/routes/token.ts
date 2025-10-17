@@ -22,11 +22,15 @@ app.post("/", async (c) => {
     }
     const authCode = AuthCodeSchema.parse(rawAuthCode);
 
-    if (
-        authCode.client_id !== client_id ||
-        authCode.redirect_uri !== redirect_uri
-    ) {
-        return c.json({ error: "invalid_authorization_code_data" }, 400);
+    if (client_id && authCode.client_id !== client_id) {
+        return c.json({ error: "invalid_authorization_code_client_id" }, 400);
+    }
+
+    if (authCode.redirect_uri !== redirect_uri) {
+        return c.json(
+            { error: "invalid_authorization_code_redirect_uri" },
+            400
+        );
     }
 
     const verifierHash = createHash("sha256")
@@ -53,7 +57,7 @@ app.post("/", async (c) => {
         sub: authCode.user_id,
         email: authCode.email,
         name: authCode.name,
-        aud: client_id,
+        aud: authCode.client_id,
         iss: c.env.ISSUER,
         iat: now,
         exp: now + Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),

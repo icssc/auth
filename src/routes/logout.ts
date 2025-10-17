@@ -1,6 +1,16 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+app.use(
+    "/*",
+    cors({
+        origin: (origin) => origin,
+        allowMethods: ["GET", "POST", "OPTIONS"],
+        credentials: true,
+    })
+);
 
 app.get("/", async (c) => {
     const cookie = c.req.header("Cookie") ?? "";
@@ -11,14 +21,22 @@ app.get("/", async (c) => {
     }
 
     const clearCookie =
-        "sid=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+        "sid=; Domain=auth.icssc.club; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 
-    return new Response(null, {
-        status: 302,
-        headers: {
-            "Set-Cookie": clearCookie,
-            Location: "/",
-        },
+    const redirectTo = c.req.query("redirect_to");
+
+    if (redirectTo) {
+        return new Response(null, {
+            status: 302,
+            headers: {
+                "Set-Cookie": clearCookie,
+                Location: redirectTo,
+            },
+        });
+    }
+
+    return c.json({ success: true, message: "Logged out successfully" }, 200, {
+        "Set-Cookie": clearCookie,
     });
 });
 
