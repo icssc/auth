@@ -20,7 +20,11 @@ app.post("/", async (c) => {
     if (!rawAuthCode) {
         return c.json({ error: "invalid_authorization_code" }, 400);
     }
-    const authCode = AuthCodeSchema.parse(rawAuthCode);
+    const parsedAuthCode = AuthCodeSchema.safeParse(rawAuthCode);
+    if (!parsedAuthCode.success) {
+        return c.json({ error: "invalid_authorization_code" }, 400);
+    }
+    const authCode = parsedAuthCode.data;
 
     if (client_id && authCode.client_id !== client_id) {
         return c.json({ error: "invalid_authorization_code_client_id" }, 400);
@@ -48,8 +52,11 @@ app.post("/", async (c) => {
     if (!rawKeypair) {
         return c.json({ error: "server_error" }, 500);
     }
-    const keypair = KeyPairSchema.parse(rawKeypair);
-
+    const parsedKeypair = KeyPairSchema.safeParse(rawKeypair);
+    if (!parsedKeypair.success) {
+        return c.json({ error: "server_error" }, 500);
+    }
+    const keypair = parsedKeypair.data;
     const privateKey = await importJWK(keypair.privateJwk, "RS256");
 
     const now = Math.floor(Date.now() / 1000);

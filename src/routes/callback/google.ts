@@ -25,16 +25,12 @@ app.get("/", async (c) => {
         return c.json({ error: "invalid_request" }, 400);
     }
 
-    const { data: stateData, error: stateDataError } = await tryCatch(
-        (async () => {
-            const decoded = JSON.parse(atob(stateParam));
-            return StateDataSchema.parseAsync(decoded);
-        })()
-    );
-
-    if (stateDataError) {
+    const decoded = JSON.parse(atob(stateParam));
+    const parsedStateData = StateDataSchema.safeParse(decoded);
+    if (!parsedStateData.success) {
         return c.json({ error: "invalid_state" }, 400);
     }
+    const stateData = parsedStateData.data;
 
     const oauth2Client = createGoogleOAuth2Client(c.env);
     const { data: tokenResult, error: tokenError } = await tryCatch(
