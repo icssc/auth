@@ -18,6 +18,13 @@ export const clients: Record<string, Client> = {
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac",
     },
+    "antalmanac-dev": {
+        clientId: "antalmanac-dev",
+        clientSecret: null,
+        redirectUri: "http://localhost:5173/auth", // TODO @KevinWu098
+        tokenEndpointAuthMethod: "none",
+        name: "AntAlmanac Dev",
+    },
     "test-client-id": {
         clientId: "test-client-id",
         clientSecret: null,
