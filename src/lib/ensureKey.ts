@@ -16,7 +16,6 @@ export async function ensureKey(
             console.error("Failed to parse existing keypair:", result.error);
         }
 
-        // If not found, generate new keypair
         const { publicKey, privateKey } = await generateKeyPair("RS256", {
             extractable: true,
         });

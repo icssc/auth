@@ -1,19 +1,11 @@
 import { createHash } from "crypto";
 import { Hono } from "hono";
 import { importJWK, SignJWT } from "jose";
-import { z } from "zod";
 import { AuthCodeSchema } from "@/lib/schemas/authcode";
 import { KeyPairSchema } from "@/lib/schemas/keypair";
+import { TokenRequestSchema } from "@/lib/schemas/token";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
-
-const TokenRequestSchema = z.object({
-    grant_type: z.literal("authorization_code"),
-    code: z.string(),
-    redirect_uri: z.string().url(),
-    client_id: z.string().optional(),
-    code_verifier: z.string(),
-});
 
 app.post("/", async (c) => {
     const body = await c.req.parseBody();
@@ -26,7 +18,7 @@ app.post("/", async (c) => {
 
     const rawAuthCode = await c.env.AUTH_KV_AUTHCODES.get(code, "json");
     if (!rawAuthCode) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json({ error: "invalid_authorization_code" }, 400);
     }
     const authCode = AuthCodeSchema.parse(rawAuthCode);
 
@@ -34,7 +26,7 @@ app.post("/", async (c) => {
         authCode.client_id !== client_id ||
         authCode.redirect_uri !== redirect_uri
     ) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json({ error: "invalid_authorization_code_data" }, 400);
     }
 
     const verifierHash = createHash("sha256")

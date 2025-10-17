@@ -3,8 +3,8 @@
     "type": "module",
     "scripts": {
         "dev": "wrangler dev",
-        "deploy": "wrangler deploy --minify",
-        "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+        "cf:deploy": "wrangler deploy --minify",
+        "cf:typegen": "wrangler types --env-interface CloudflareBindings",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "wrangler d1 migrations apply AUTH_DB --remote",
         "db:migrate:local": "wrangler d1 migrations apply AUTH_DB --local",

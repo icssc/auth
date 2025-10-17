@@ -1,30 +1,11 @@
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { z } from "zod";
-import { getDb } from "@/db";
-import { clients } from "@/db/schema";
+import { validateClient } from "@/lib/clients";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
-import type { AuthCodeSchema } from "@/lib/schemas/authcode";
+import type { AuthCode } from "@/lib/schemas/authcode";
+import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
+import type { StateData } from "@/lib/schemas/state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
-
-const AuthorizeQuerySchema = z.object({
-    response_type: z.literal("code"),
-    client_id: z.string(),
-    redirect_uri: z.string().url(),
-    scope: z.string(),
-    state: z.string().optional(),
-    code_challenge: z.string(),
-    code_challenge_method: z.literal("S256"),
-});
-
-const StateDataSchema = z.object({
-    client_id: z.string(),
-    redirect_uri: z.string(),
-    state: z.string().optional(),
-    code_challenge: z.string(),
-    scope: z.string(),
-});
 
 app.get("/", async (c) => {
     const query = c.req.query();
@@ -36,24 +17,18 @@ app.get("/", async (c) => {
     const { client_id, redirect_uri, state, code_challenge, scope } =
         parsed.data;
 
-    const db = getDb(c.env.AUTH_DB);
-    const client = await db
-        .select()
-        .from(clients)
-        .where(eq(clients.clientId, client_id))
-        .get();
-
-    if (!client || client.redirectUri !== redirect_uri) {
+    const client = validateClient(client_id, redirect_uri);
+    if (!client) {
         return c.json({ error: "unauthorized_client" }, 400);
     }
 
-    // 2️⃣ Check session
     const cookie = c.req.header("Cookie") ?? "";
     const sidMatch = /sid=([^;]+)/.exec(cookie);
     const sid = sidMatch?.[1];
 
     let session: { user_id: string; email: string; name: string } | null = null;
 
+    // `sid` is session id
     if (sid) {
         const sessionData = await c.env.AUTH_KV_SESSIONS.get(sid);
         if (sessionData) {
@@ -69,7 +44,7 @@ app.get("/", async (c) => {
             state,
             code_challenge,
             scope,
-        } satisfies z.infer<typeof StateDataSchema>;
+        } satisfies StateData;
 
         const googleAuthUrl = oauth2Client.generateAuthUrl({
             access_type: "online",
@@ -89,10 +64,9 @@ app.get("/", async (c) => {
         code_challenge,
         scope,
         created_at: Date.now(),
-    } satisfies z.infer<typeof AuthCodeSchema>;
+    } satisfies AuthCode;
     await c.env.AUTH_KV_AUTHCODES.put(code, JSON.stringify(authCode), {
-        expirationTtl:
-            Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10) || 300,
+        expirationTtl: Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10),
     });
 
     const redirectUrl = new URL(redirect_uri);

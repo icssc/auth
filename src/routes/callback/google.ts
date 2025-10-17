@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { z } from "zod";
+import * as z from "zod";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { createGoogleOAuth2Client } from "@/lib/oauth";

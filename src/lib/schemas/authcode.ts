@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 export const AuthCodeSchema = z.object({
     user_id: z.string(),
@@ -8,3 +8,5 @@ export const AuthCodeSchema = z.object({
     scope: z.string(),
     created_at: z.number(),
 });
+
+export type AuthCode = z.infer<typeof AuthCodeSchema>;
