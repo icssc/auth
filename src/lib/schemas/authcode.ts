@@ -9,6 +9,10 @@ export const AuthCodeSchema = z.object({
     code_challenge: z.string(),
     scope: z.string(),
     created_at: z.number(),
+    // Google OAuth tokens for accessing Google APIs
+    google_access_token: z.string().optional(),
+    google_refresh_token: z.string().optional(),
+    google_token_expiry: z.number().optional(), // Unix timestamp in milliseconds
 });
 
 export type AuthCode = z.infer<typeof AuthCodeSchema>;

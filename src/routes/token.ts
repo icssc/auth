@@ -80,6 +80,9 @@ app.post("/", async (c) => {
             name: authCode.name,
             scope: authCode.scope,
             exp: now + Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
+            google_access_token: authCode.google_access_token,
+            google_refresh_token: authCode.google_refresh_token,
+            google_token_expiry: authCode.google_token_expiry,
         }),
         {
             expirationTtl: Number.parseInt(
@@ -89,20 +92,36 @@ app.post("/", async (c) => {
         }
     );
 
-    return c.json(
-        {
-            token_type: "Bearer",
-            access_token: accessToken,
-            id_token: idToken,
-            expires_in: Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
-        },
-        200,
-        {
-            "Cache-Control": "no-store",
-            Pragma: "no-cache",
-            "Content-Type": "application/json",
-        }
-    );
+    const response: {
+        token_type: string;
+        access_token: string;
+        id_token: string;
+        expires_in: number;
+        google_access_token?: string;
+        google_refresh_token?: string;
+        google_token_expiry?: number;
+    } = {
+        token_type: "Bearer",
+        access_token: accessToken,
+        id_token: idToken,
+        expires_in: Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
+    };
+
+    if (authCode.google_access_token) {
+        response.google_access_token = authCode.google_access_token;
+    }
+    if (authCode.google_refresh_token) {
+        response.google_refresh_token = authCode.google_refresh_token;
+    }
+    if (authCode.google_token_expiry) {
+        response.google_token_expiry = authCode.google_token_expiry;
+    }
+
+    return c.json(response, 200, {
+        "Cache-Control": "no-store",
+        Pragma: "no-cache",
+        "Content-Type": "application/json",
+    });
 });
 
 export default app;

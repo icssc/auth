@@ -57,11 +57,18 @@ app.get("/", async (c) => {
     const userInfo = userInfoResult.data;
     const userId = `google_${userInfo.id}`;
 
+    const googleAccessToken = tokenResult.tokens.access_token ?? undefined;
+    const googleRefreshToken = tokenResult.tokens.refresh_token ?? undefined;
+    const googleTokenExpiry = tokenResult.tokens.expiry_date ?? undefined;
+
     const sessionId = crypto.randomUUID();
     const sessionData = {
         user_id: userId,
         email: userInfo.email,
         name: userInfo.name,
+        google_access_token: googleAccessToken,
+        google_refresh_token: googleRefreshToken,
+        google_token_expiry: googleTokenExpiry,
     };
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;
@@ -79,6 +86,9 @@ app.get("/", async (c) => {
         code_challenge: stateData.code_challenge,
         scope: stateData.scope,
         created_at: Date.now(),
+        google_access_token: googleAccessToken,
+        google_refresh_token: googleRefreshToken,
+        google_token_expiry: googleTokenExpiry,
     } satisfies AuthCode;
 
     await c.env.AUTH_KV_AUTHCODES.put(authCode, JSON.stringify(codeData), {

@@ -26,7 +26,14 @@ app.get("/", async (c) => {
     const sidMatch = /sid=([^;]+)/.exec(cookie);
     const sid = sidMatch?.[1];
 
-    let session: { user_id: string; email: string; name: string } | null = null;
+    let session: {
+        user_id: string;
+        email: string;
+        name: string;
+        google_access_token?: string;
+        google_refresh_token?: string;
+        google_token_expiry?: number;
+    } | null = null;
 
     // `sid` is session id
     if (sid) {
@@ -47,7 +54,7 @@ app.get("/", async (c) => {
         } satisfies StateData;
 
         const googleAuthUrl = oauth2Client.generateAuthUrl({
-            access_type: "online",
+            access_type: "offline", // Request refresh token
             scope: scope.split(" "),
             prompt: "consent",
             state: btoa(JSON.stringify(stateData)),
@@ -66,6 +73,9 @@ app.get("/", async (c) => {
         code_challenge,
         scope,
         created_at: Date.now(),
+        google_access_token: session.google_access_token,
+        google_refresh_token: session.google_refresh_token,
+        google_token_expiry: session.google_token_expiry,
     } satisfies AuthCode;
     await c.env.AUTH_KV_AUTHCODES.put(code, JSON.stringify(authCode), {
         expirationTtl: Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10),
