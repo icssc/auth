@@ -5,6 +5,7 @@ import callbackRoutes from "@/routes/callback";
 import logoutRoutes from "@/routes/logout";
 import sessionRoutes from "@/routes/session";
 import tokenRoutes from "@/routes/token";
+import userinfoRoutes from "@/routes/userinfo";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -13,6 +14,7 @@ app.route("/callback", callbackRoutes);
 app.route("/token", tokenRoutes);
 app.route("/logout", logoutRoutes);
 app.route("/session", sessionRoutes);
+app.route("/userinfo", userinfoRoutes);
 
 app.get("/.well-known/openid-configuration", (c) => {
     const iss = c.env.ISSUER;
@@ -21,6 +23,7 @@ app.get("/.well-known/openid-configuration", (c) => {
         issuer: iss,
         authorization_endpoint: `${iss}/authorize`,
         token_endpoint: `${iss}/token`,
+        userinfo_endpoint: `${iss}/userinfo`,
         jwks_uri: `${iss}/jwks.json`,
         scopes_supported: [
             "openid",
