@@ -25,19 +25,12 @@ export const clients: Record<string, Client> = {
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac Dev",
     },
-    "test-client-id": {
-        clientId: "test-client-id",
+    "zotmeet-dev": {
+        clientId: "zotmeet-dev",
         clientSecret: null,
-        redirectUri: "http://localhost:3000/api/auth/callback/icssc",
+        redirectUri: "http://localhost:3000/auth/login/google/callback",
         tokenEndpointAuthMethod: "none",
-        name: "Next.js Test Client",
-    },
-    "test-client-two-id": {
-        clientId: "test-client-two-id",
-        clientSecret: null,
-        redirectUri: "http://localhost:3001/api/auth/callback/icssc",
-        tokenEndpointAuthMethod: "none",
-        name: "Next.js Test Client #2",
+        name: "ZotMeet Dev",
     },
 };
 

@@ -12,7 +12,7 @@ app.use(
     })
 );
 
-app.get("/", async (c) => {
+const logoutHandler = async (c: any) => {
     const cookie = c.req.header("Cookie") ?? "";
     const sid = /sid=([^;]+)/.exec(cookie)?.[1];
 
@@ -21,7 +21,7 @@ app.get("/", async (c) => {
     }
 
     const clearCookie =
-        "sid=; Domain=auth.icssc.club; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+        "sid=; Domain=auth.icssc.club; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0";
 
     const redirectTo = c.req.query("redirect_to");
 
@@ -38,6 +38,9 @@ app.get("/", async (c) => {
     return c.json({ success: true, message: "Logged out successfully" }, 200, {
         "Set-Cookie": clearCookie,
     });
-});
+};
+
+app.get("/", logoutHandler);
+app.post("/", logoutHandler);
 
 export default app;

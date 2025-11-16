@@ -48,7 +48,7 @@ app.get("/", async (c) => {
 
         const googleAuthUrl = oauth2Client.generateAuthUrl({
             access_type: "online",
-            scope: ["openid", "email", "profile"],
+            scope: scope.split(" "),
             prompt: "consent",
             state: btoa(JSON.stringify(stateData)),
         });

@@ -22,7 +22,12 @@ app.get("/.well-known/openid-configuration", (c) => {
         authorization_endpoint: `${iss}/authorize`,
         token_endpoint: `${iss}/token`,
         jwks_uri: `${iss}/jwks.json`,
-        scopes_supported: ["openid", "profile", "email"],
+        scopes_supported: [
+            "openid",
+            "profile",
+            "email",
+            "https://www.googleapis.com/auth/calendar.readonly",
+        ],
         response_types_supported: ["code"],
         grant_types_supported: ["authorization_code", "refresh_token"],
         subject_types_supported: ["public"],
