@@ -24,7 +24,7 @@ const logoutHandler = async (c: any) => {
     const clearCookie =
         "sid=; Domain=auth.icssc.club; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0";
 
-    const redirectTo = c.req.query("redirect_to");
+    const redirectTo = c.req.query("post_logout_redirect_uri");
 
     if (redirectTo) {
         if (!isAllowedRedirectUrl(redirectTo)) {

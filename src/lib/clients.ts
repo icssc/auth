@@ -18,7 +18,10 @@ export const clients: Record<string, Client> = {
         redirectUri: "https://antalmanac.com/auth", // TODO @KevinWu098
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac",
-        allowedDomainPatterns: ["https://staging-*.antalmanac.com"],
+        allowedDomainPatterns: [
+            "https://antalmanac.com",
+            "https://staging-*.antalmanac.com",
+        ],
     },
     "antalmanac-dev": {
         clientId: "antalmanac-dev",
@@ -26,6 +29,7 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:5173/auth", // TODO @KevinWu098
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac Dev",
+        allowedDomainPatterns: ["http://localhost:5173"],
     },
     zotmeet: {
         clientId: "zotmeet",
@@ -33,7 +37,10 @@ export const clients: Record<string, Client> = {
         redirectUri: "https://zotmeet.com/auth/login/google/callback",
         tokenEndpointAuthMethod: "none",
         name: "ZotMeet",
-        allowedDomainPatterns: ["https://staging-*.zotmeet.com"],
+        allowedDomainPatterns: [
+            "https://zotmeet.com",
+            "https://staging-*.zotmeet.com",
+        ],
     },
     "zotmeet-dev": {
         clientId: "zotmeet-dev",
@@ -41,6 +48,7 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:3000/auth/login/google/callback",
         tokenEndpointAuthMethod: "none",
         name: "ZotMeet Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
 };
 
