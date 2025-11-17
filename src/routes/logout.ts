@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { isAllowedRedirectUrl } from "@/lib/clients";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -26,6 +27,20 @@ const logoutHandler = async (c: any) => {
     const redirectTo = c.req.query("redirect_to");
 
     if (redirectTo) {
+        if (!isAllowedRedirectUrl(redirectTo)) {
+            return c.json(
+                {
+                    error: "invalid_redirect",
+                    description:
+                        "The redirect_to URL is not allowed. Must match a registered client redirect URI.",
+                },
+                400,
+                {
+                    "Set-Cookie": clearCookie,
+                }
+            );
+        }
+
         return new Response(null, {
             status: 302,
             headers: {
