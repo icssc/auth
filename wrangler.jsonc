@@ -22,6 +22,11 @@
             "remote": true
         },
         {
+            "binding": "AUTH_KV_REFRESHTOKENS",
+            "id": "f7e61951e87a4ea7aace7da54a7e3d37",
+            "remote": true
+        },
+        {
             "binding": "AUTH_KV_SESSIONS",
             "id": "6271ff01d1174d8ea1a7aa5b9a4d8e7c",
             "remote": true
