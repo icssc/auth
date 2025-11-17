@@ -52,6 +52,96 @@ export function getClient(clientId: string): Client | undefined {
 }
 
 /**
+ * Check if a hostname matches a pattern with wildcards
+ * Pattern: "staging-*.example.com" matches "staging-123.example.com"
+ */
+function matchesHostnamePattern(hostname: string, pattern: string): boolean {
+    const regexPattern = pattern
+        .split(".")
+        .map((part) => {
+            if (part === "*") {
+                return "[^.]+";
+            }
+            if (part.includes("*")) {
+                return part.replace(/\*/g, ".+");
+            }
+            return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        })
+        .join("\\.");
+
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(hostname);
+}
+
+/**
+ * Check if a URL matches an exact redirect URI
+ */
+function matchesExactRedirectUri(parsedUrl: URL, redirectUri: string): boolean {
+    try {
+        const parsedRedirect = new URL(redirectUri);
+        return (
+            parsedUrl.protocol === parsedRedirect.protocol &&
+            parsedUrl.hostname === parsedRedirect.hostname &&
+            parsedUrl.port === parsedRedirect.port &&
+            parsedUrl.pathname.startsWith(parsedRedirect.pathname)
+        );
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Check if a URL matches any of the given wildcard domain patterns
+ */
+function matchesDomainPattern(parsedUrl: URL, pattern: string): boolean {
+    const patternForParsing = pattern.replace(/\*/g, "wildcard");
+
+    try {
+        const parsedPattern = new URL(patternForParsing);
+        const patternHostname = pattern
+            .replace(/^https?:\/\//, "")
+            .replace(/:\d+.*$/, "")
+            .replace(/\/.*$/, "");
+
+        return (
+            parsedUrl.protocol === parsedPattern.protocol &&
+            parsedUrl.port === parsedPattern.port &&
+            matchesHostnamePattern(parsedUrl.hostname, patternHostname)
+        );
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Check if a redirect URI is allowed for a specific client
+ */
+function isRedirectUriAllowedForClient(
+    client: Client,
+    redirectUri: string
+): boolean {
+    try {
+        const parsedUrl = new URL(redirectUri);
+
+        // Check exact match first
+        if (matchesExactRedirectUri(parsedUrl, client.redirectUri)) {
+            return true;
+        }
+
+        // Check against allowed domain patterns
+        if (client.allowedDomainPatterns) {
+            return client.allowedDomainPatterns.some((pattern) =>
+                matchesDomainPattern(parsedUrl, pattern)
+            );
+        }
+
+        return false;
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Validate client credentials
  */
 export function validateClient(
@@ -63,7 +153,7 @@ export function validateClient(
         return null;
     }
 
-    if (client.redirectUri !== redirectUri) {
+    if (!isRedirectUriAllowedForClient(client, redirectUri)) {
         return null;
     }
 
@@ -71,92 +161,28 @@ export function validateClient(
 }
 
 /**
- * Check if a hostname matches a pattern with wildcards
- * Pattern: "staging-*.example.com" matches "staging-123.example.com"
+ * Check if a redirect URL is allowed for any registered client
+ * Used by logout endpoint to prevent open redirect vulnerabilities
  */
-function matchesHostnamePattern(hostname: string, pattern: string): boolean {
-    // Convert pattern to regex, escaping special chars except *
-    const regexPattern = pattern
-        .split(".")
-        .map((part) => {
-            if (part === "*") {
-                return "[^.]+"; // Match any non-dot characters (at least one)
-            }
-            if (part.includes("*")) {
-                // Handle patterns like "staging-*"
-                // Replace * with .+ (one or more chars) instead of .* (zero or more)
-                return part.replace(/\*/g, ".+");
-            }
-            // Escape special regex characters
-            return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        })
-        .join("\\.");
-
-    const regex = new RegExp(`^${regexPattern}$`);
-    return regex.test(hostname);
-}
-
 export function isAllowedRedirectUrl(url: string): boolean {
     try {
         const parsedUrl = new URL(url);
 
-        // Check exact redirect URI matches
-        const exactMatch = Object.values(clients).some((client) => {
-            const parsedAllowed = new URL(client.redirectUri);
-
-            if (
-                parsedUrl.protocol !== parsedAllowed.protocol ||
-                parsedUrl.hostname !== parsedAllowed.hostname ||
-                parsedUrl.port !== parsedAllowed.port
-            ) {
-                return false;
-            }
-
-            return parsedUrl.pathname.startsWith(parsedAllowed.pathname);
-        });
-
-        if (exactMatch) {
-            return true;
-        }
-
-        // Check domain patterns with wildcards
+        // Check if URL matches any client's configuration
         return Object.values(clients).some((client) => {
-            if (!client.allowedDomainPatterns) {
-                return false;
+            // Check exact redirect URI match
+            if (matchesExactRedirectUri(parsedUrl, client.redirectUri)) {
+                return true;
             }
 
-            return client.allowedDomainPatterns.some((pattern) => {
-                // Parse the pattern by replacing * with a placeholder for URL parsing
-                const patternForParsing = pattern.replace(/\*/g, "wildcard");
+            // Check domain patterns
+            if (client.allowedDomainPatterns) {
+                return client.allowedDomainPatterns.some((pattern) =>
+                    matchesDomainPattern(parsedUrl, pattern)
+                );
+            }
 
-                try {
-                    const parsedPattern = new URL(patternForParsing);
-
-                    // Extract the original pattern hostname (with wildcards)
-                    const patternHostname = pattern
-                        .replace(/^https?:\/\//, "")
-                        .replace(/:\d+.*$/, "") // Remove port and path
-                        .replace(/\/.*$/, ""); // Remove path
-
-                    // Protocol must match exactly
-                    if (parsedUrl.protocol !== parsedPattern.protocol) {
-                        return false;
-                    }
-
-                    // Port must match exactly
-                    if (parsedUrl.port !== parsedPattern.port) {
-                        return false;
-                    }
-
-                    // Check hostname with wildcard matching
-                    return matchesHostnamePattern(
-                        parsedUrl.hostname,
-                        patternHostname
-                    );
-                } catch {
-                    return false;
-                }
-            });
+            return false;
         });
     } catch {
         return false;
