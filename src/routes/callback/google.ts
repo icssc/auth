@@ -72,6 +72,7 @@ app.get("/", async (c) => {
     };
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;
+
     await c.env.AUTH_KV_SESSIONS.put(sessionId, JSON.stringify(sessionData), {
         expirationTtl: sessionTtl,
     });
@@ -100,11 +101,16 @@ app.get("/", async (c) => {
     redirectUrl.searchParams.set("code", authCode);
     if (stateData.state) redirectUrl.searchParams.set("state", stateData.state);
 
+    const requestUrl = new URL(c.req.url);
+    const cookieDomain = requestUrl.hostname;
+    const isSecure = requestUrl.protocol === "https:";
+
+    const cookieValue = isSecure
+        ? `sid=${sessionId}; Domain=${cookieDomain}; HttpOnly; Secure; SameSite=None; Max-Age=${sessionTtl}; Path=/`
+        : `sid=${sessionId}; HttpOnly; SameSite=Lax; Max-Age=${sessionTtl}; Path=/`;
+
     const response = c.redirect(redirectUrl.toString(), 302);
-    response.headers.set(
-        "Set-Cookie",
-        `sid=${sessionId}; Domain=auth.icssc.club; HttpOnly; Secure; SameSite=None; Max-Age=${sessionTtl}; Path=/`
-    );
+    response.headers.set("Set-Cookie", cookieValue);
     return response;
 });
 

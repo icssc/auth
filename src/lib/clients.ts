@@ -15,7 +15,7 @@ export const clients: Record<string, Client> = {
     antalmanac: {
         clientId: "antalmanac",
         clientSecret: null,
-        redirectUri: "https://antalmanac.com/auth", // TODO @KevinWu098
+        redirectUri: "https://antalmanac.com/auth",
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac",
         allowedDomainPatterns: [
@@ -26,10 +26,29 @@ export const clients: Record<string, Client> = {
     "antalmanac-dev": {
         clientId: "antalmanac-dev",
         clientSecret: null,
-        redirectUri: "http://localhost:5173/auth", // TODO @KevinWu098
+        redirectUri: "http://localhost:5173/auth",
         tokenEndpointAuthMethod: "none",
         name: "AntAlmanac Dev",
         allowedDomainPatterns: ["http://localhost:5173"],
+    },
+    peterportal: {
+        clientId: "peterportal",
+        clientSecret: null,
+        redirectUri: "https://peterportal.com/api/users/auth/google/callback",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPortal",
+        allowedDomainPatterns: [
+            "https://peterportal.com",
+            "https://staging-*.peterportal.com",
+        ],
+    },
+    "peterportal-dev": {
+        clientId: "peterportal-dev",
+        clientSecret: null,
+        redirectUri: "http://localhost:3000/api/users/auth/google/callback",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPortal Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
     zotmeet: {
         clientId: "zotmeet",
@@ -48,6 +67,14 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:3000/auth/login/google/callback",
         tokenEndpointAuthMethod: "none",
         name: "ZotMeet Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
+    },
+    test: {
+        clientId: "test",
+        clientSecret: null,
+        redirectUri: "http://localhost:3000/auth",
+        tokenEndpointAuthMethod: "none",
+        name: "Test",
         allowedDomainPatterns: ["http://localhost:3000"],
     },
 };

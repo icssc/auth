@@ -21,8 +21,14 @@ const logoutHandler = async (c: any) => {
         await c.env.AUTH_KV_SESSIONS.delete(sid);
     }
 
-    const clearCookie =
-        "sid=; Domain=auth.icssc.club; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0";
+    // Get the request URL to determine the domain
+    const requestUrl = new URL(c.req.url);
+    const cookieDomain = requestUrl.hostname;
+    const isSecure = requestUrl.protocol === "https:";
+
+    const clearCookie = isSecure
+        ? `sid=; Domain=${cookieDomain}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`
+        : `sid=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 
     const redirectTo = c.req.query("post_logout_redirect_uri");
 
