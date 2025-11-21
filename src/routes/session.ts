@@ -34,6 +34,7 @@ app.get("/", async (c) => {
                 id: session.user_id,
                 email: session.email,
                 name: session.name,
+                picture: session.picture,
             },
         },
         200

@@ -7,6 +7,7 @@ const AccessTokenDataSchema = z.object({
     user_id: z.string(),
     email: z.string(),
     name: z.string(),
+    picture: z.string().optional(),
     scope: z.string(),
     exp: z.number(),
 });
@@ -58,8 +59,9 @@ app.get("/", async (c) => {
     }
 
     const scopes = tokenData.scope.split(" ");
-    const response: Record<string, string> = {
+    const response: Record<string, string | undefined> = {
         sub: tokenData.user_id,
+        picture: tokenData.picture,
     };
     if (scopes.includes("profile")) {
         response.name = tokenData.name;

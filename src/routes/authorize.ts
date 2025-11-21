@@ -30,6 +30,7 @@ app.get("/", async (c) => {
         user_id: string;
         email: string;
         name: string;
+        picture?: string;
         google_access_token?: string;
         google_refresh_token?: string;
         google_token_expiry?: number;
@@ -68,6 +69,7 @@ app.get("/", async (c) => {
         user_id: session.user_id,
         email: session.email,
         name: session.name,
+        picture: session.picture,
         client_id,
         redirect_uri,
         code_challenge,

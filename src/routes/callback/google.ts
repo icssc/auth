@@ -46,6 +46,7 @@ app.get("/", async (c) => {
             id: string;
             email: string;
             name: string;
+            picture: string;
         }>({
             url: "https://www.googleapis.com/oauth2/v2/userinfo",
         })
@@ -66,6 +67,7 @@ app.get("/", async (c) => {
         user_id: userId,
         email: userInfo.email,
         name: userInfo.name,
+        picture: userInfo.picture,
         google_access_token: googleAccessToken,
         google_refresh_token: googleRefreshToken,
         google_token_expiry: googleTokenExpiry,
@@ -82,6 +84,7 @@ app.get("/", async (c) => {
         user_id: userId,
         email: userInfo.email,
         name: userInfo.name,
+        picture: userInfo.picture,
         client_id: stateData.client_id,
         redirect_uri: stateData.redirect_uri,
         code_challenge: stateData.code_challenge,

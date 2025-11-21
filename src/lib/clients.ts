@@ -45,10 +45,10 @@ export const clients: Record<string, Client> = {
     "peterportal-dev": {
         clientId: "peterportal-dev",
         clientSecret: null,
-        redirectUri: "http://localhost:3000/api/users/auth/google/callback",
+        redirectUri: "http://localhost:8080/api/users/auth/google/callback",
         tokenEndpointAuthMethod: "none",
         name: "PeterPortal Dev",
-        allowedDomainPatterns: ["http://localhost:3000"],
+        allowedDomainPatterns: ["http://localhost:8080", "http://localhost:3000"],
     },
     zotmeet: {
         clientId: "zotmeet",
