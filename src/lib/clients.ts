@@ -38,8 +38,8 @@ export const clients: Record<string, Client> = {
         tokenEndpointAuthMethod: "none",
         name: "PeterPortal",
         allowedDomainPatterns: [
-            "https://peterportal.com",
-            "https://staging-*.peterportal.com",
+            "https://peterportal.org",
+            "https://staging-*.peterportal.org",
         ],
     },
     "peterportal-dev": {
