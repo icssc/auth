@@ -26,17 +26,9 @@ export const clients: Record<string, Client> = {
     "antalmanac-dev": {
         clientId: "antalmanac-dev",
         clientSecret: null,
-        redirectUri: "http://localhost:5173/auth",
-        tokenEndpointAuthMethod: "none",
-        name: "AntAlmanac Dev",
-        allowedDomainPatterns: ["http://localhost:5173"],
-    },
-    "antalmanac-dev-sst": {
-        clientId: "antalmanac-dev-sst",
-        clientSecret: null,
         redirectUri: "http://localhost:3000/auth",
         tokenEndpointAuthMethod: "none",
-        name: "AntAlmanac Dev SST",
+        name: "AntAlmanac Dev",
         allowedDomainPatterns: ["http://localhost:3000"],
     },
     peterportal: {
