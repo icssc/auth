@@ -71,6 +71,7 @@ app.get("/", async (c) => {
         google_access_token: googleAccessToken,
         google_refresh_token: googleRefreshToken,
         google_token_expiry: googleTokenExpiry,
+        scope: stateData.scope,
     };
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;

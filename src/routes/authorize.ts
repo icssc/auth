@@ -34,6 +34,7 @@ app.get("/", async (c) => {
         google_access_token?: string;
         google_refresh_token?: string;
         google_token_expiry?: number;
+        scope: string;
     } | null = null;
 
     // `sid` is session id
@@ -44,7 +45,9 @@ app.get("/", async (c) => {
         }
     }
 
-    if (!session) {
+    const normalizeScope = (s: string) => s.split(" ").sort().join(" ");
+
+    if (!session || normalizeScope(session.scope) !== normalizeScope(scope)) {
         const oauth2Client = createGoogleOAuth2Client(c.env);
         const stateData = {
             client_id,
