@@ -14,7 +14,7 @@ app.get("/", async (c) => {
         return c.json({ error: "invalid_request" }, 400);
     }
 
-    const { client_id, redirect_uri, state, code_challenge, scope } =
+    const { client_id, redirect_uri, state, code_challenge, scope, prompt } =
         parsed.data;
 
     const client = validateClient(client_id, redirect_uri);
@@ -47,7 +47,11 @@ app.get("/", async (c) => {
 
     const normalizeScope = (s: string) => s.split(" ").sort().join(" ");
 
-    if (!session || normalizeScope(session.scope) !== normalizeScope(scope)) {
+    if (
+        !session ||
+        normalizeScope(session.scope) !== normalizeScope(scope) ||
+        prompt === "consent"
+    ) {
         const oauth2Client = createGoogleOAuth2Client(c.env);
         const stateData = {
             client_id,

@@ -8,6 +8,7 @@ export const AuthorizeQuerySchema = z.object({
     state: z.string().optional(),
     code_challenge: z.string(),
     code_challenge_method: z.literal("S256"),
+    prompt: z.enum(["none", "consent"]).optional(),
 });
 
 export type AuthorizeQuery = z.infer<typeof AuthorizeQuerySchema>;
