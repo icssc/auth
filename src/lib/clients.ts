@@ -36,7 +36,7 @@ export const clients: Record<string, Client> = {
     "peterplate": {
         clientId: "peterplate",
         clientSecret: null,
-        redirectUri: "https://peterplate.com/api/auth/callback/google",
+        redirectUri: "https://peterplate.com/api/auth/oauth2/callback/icssc",
         tokenEndpointAuthMethod: "none",
         name: "PeterPlate",
         allowedDomainPatterns: [
@@ -47,7 +47,7 @@ export const clients: Record<string, Client> = {
     "peterplate-dev": {
         clientId: "peterplate-dev",
         clientSecret: null,
-        redirectUri: "http://localhost:3000/api/auth/callback/google",
+        redirectUri: "http://localhost:3000/api/auth/oauth2/callback/icssc",
         tokenEndpointAuthMethod: "none",
         name: "PeterPlate Dev",
         allowedDomainPatterns: ["http://localhost:3000"],
