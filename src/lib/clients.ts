@@ -33,6 +33,25 @@ export const clients: Record<string, Client> = {
         name: "AntAlmanac Dev",
         allowedDomainPatterns: ["http://localhost:3000"],
     },
+    "peterplate": {
+        clientId: "peterplate",
+        clientSecret: null,
+        redirectUri: "https://peterplate.com/api/auth/callback/google",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPlate",
+        allowedDomainPatterns: [
+            "https://peterplate.com",
+            "https://staging-*.peterplate.com"
+        ],
+    },
+    "peterplate-dev": {
+        clientId: "peterplate-dev",
+        clientSecret: null,
+        redirectUri: "http://localhost:3000/api/auth/callback/google",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPlate Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
+    },
     peterportal: {
         clientId: "peterportal",
         clientSecret: null,
