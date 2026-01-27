@@ -45,11 +45,15 @@ app.get("/", async (c) => {
         }
     }
 
-    const normalizeScope = (s: string) => s.split(" ").sort().join(" ");
+    const scopesSatisfied = (sessionScope: string, requestedScope: string) => {
+        const sessionScopes = new Set(sessionScope.split(" "));
+        const requestedScopes = requestedScope.split(" ");
+        return requestedScopes.every((s) => sessionScopes.has(s));
+    };
 
     if (
         !session ||
-        normalizeScope(session.scope) !== normalizeScope(scope) ||
+        !scopesSatisfied(session.scope, scope) ||
         prompt === "consent"
     ) {
         const oauth2Client = createGoogleOAuth2Client(c.env);
