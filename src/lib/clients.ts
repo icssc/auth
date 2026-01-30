@@ -33,25 +33,6 @@ export const clients: Record<string, Client> = {
         name: "AntAlmanac Dev",
         allowedDomainPatterns: ["http://localhost:3000"],
     },
-    "peterplate": {
-        clientId: "peterplate",
-        clientSecret: null,
-        redirectUri: "https://peterplate.com/api/auth/oauth2/callback/icssc",
-        tokenEndpointAuthMethod: "none",
-        name: "PeterPlate",
-        allowedDomainPatterns: [
-            "https://peterplate.com",
-            "https://staging-*.peterplate.com"
-        ],
-    },
-    "peterplate-dev": {
-        clientId: "peterplate-dev",
-        clientSecret: null,
-        redirectUri: "http://localhost:3000/api/auth/oauth2/callback/icssc",
-        tokenEndpointAuthMethod: "none",
-        name: "PeterPlate Dev",
-        allowedDomainPatterns: ["http://localhost:3000"],
-    },
     peterportal: {
         clientId: "peterportal",
         clientSecret: null,
@@ -60,6 +41,7 @@ export const clients: Record<string, Client> = {
         name: "PeterPortal",
         allowedDomainPatterns: [
             "https://peterportal.org",
+            "https://staging-shared.antalmanac.com",
             "https://staging-*.peterportal.org",
             "https://scheduler-*.antalmanac.com",
             "https://planner-*.antalmanac.com",
@@ -71,7 +53,29 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:8080/api/users/auth/google/callback",
         tokenEndpointAuthMethod: "none",
         name: "PeterPortal Dev",
-        allowedDomainPatterns: ["http://localhost:8080", "http://localhost:3000"],
+        allowedDomainPatterns: [
+            "http://localhost:8080",
+            "http://localhost:3000",
+        ],
+    },
+    peterplate: {
+        clientId: "peterplate",
+        clientSecret: null,
+        redirectUri: "https://peterplate.com/api/auth/oauth2/callback/icssc",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPlate",
+        allowedDomainPatterns: [
+            "https://peterplate.com",
+            "https://staging-*.peterplate.com",
+        ],
+    },
+    "peterplate-dev": {
+        clientId: "peterplate-dev",
+        clientSecret: null,
+        redirectUri: "http://localhost:3000/api/auth/oauth2/callback/icssc",
+        tokenEndpointAuthMethod: "none",
+        name: "PeterPlate Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
     zotmeet: {
         clientId: "zotmeet",
