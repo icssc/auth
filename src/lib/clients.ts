@@ -130,7 +130,7 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:3000/api/auth/callback",
         tokenEndpointAuthMethod: "none",
         name: "ZotNFound (dev)",
-        allowedDomainPatterns: ["http://localhost:3000", "http://localhost:8080"],
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
 };
 
