@@ -110,7 +110,7 @@ export const clients: Record<string, Client> = {
         clientSecret: null,
         redirectUri: "https://zotnfound.com/api/auth/callback",
         tokenEndpointAuthMethod: "none",
-        name: "ZotNFound (prod)",
+        name: "ZotNFound",
         allowedDomainPatterns: [
             "https://zotnfound.com",
             "https://www.zotnfound.com",
