@@ -121,7 +121,7 @@ export const clients: Record<string, Client> = {
         clientSecret: null,
         redirectUri: "https://clone.zotnfound.com/api/auth/callback",
         tokenEndpointAuthMethod: "none",
-        name: "ZotNFound (clone)",
+        name: "ZotNFound Stage",
         allowedDomainPatterns: ["https://clone.zotnfound.com"],
     },
     "zotnfound-dev": {
@@ -129,7 +129,7 @@ export const clients: Record<string, Client> = {
         clientSecret: null,
         redirectUri: "http://localhost:3000/api/auth/callback",
         tokenEndpointAuthMethod: "none",
-        name: "ZotNFound (dev)",
+        name: "ZotNFound Dev",
         allowedDomainPatterns: ["http://localhost:3000"],
     },
 };
