@@ -41,6 +41,7 @@ export const clients: Record<string, Client> = {
         name: "PeterPortal",
         allowedDomainPatterns: [
             "https://peterportal.org",
+            "https://antalmanac.com",
             "https://staging-shared.antalmanac.com",
             "https://staging-*.peterportal.org",
             "https://scheduler-*.antalmanac.com",
