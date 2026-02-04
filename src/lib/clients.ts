@@ -104,6 +104,33 @@ export const clients: Record<string, Client> = {
         tokenEndpointAuthMethod: "none",
         name: "Test",
         allowedDomainPatterns: ["http://localhost:3000"],
+  },
+    zotnfound: {
+        clientId: "zotnfound",
+        clientSecret: null,
+        redirectUri: "https://zotnfound.com/api/auth/callback",
+        tokenEndpointAuthMethod: "none",
+        name: "ZotNFound",
+        allowedDomainPatterns: [
+            "https://zotnfound.com",
+            "https://www.zotnfound.com",
+        ],
+    },
+    "zotnfound-clone": {
+        clientId: "zotnfound-clone",
+        clientSecret: null,
+        redirectUri: "https://clone.zotnfound.com/api/auth/callback",
+        tokenEndpointAuthMethod: "none",
+        name: "ZotNFound Clone",
+        allowedDomainPatterns: ["https://clone.zotnfound.com", "https://staging-*.zotnfound.com"],
+    },
+    "zotnfound-dev": {
+        clientId: "zotnfound-dev",
+        clientSecret: null,
+        redirectUri: "http://localhost:3000/api/auth/callback",
+        tokenEndpointAuthMethod: "none",
+        name: "ZotNFound Dev",
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
 };
 
