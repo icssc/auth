@@ -52,54 +52,67 @@ app.get("/", async (c) => {
     };
 
     if (
-        !session ||
-        !scopesSatisfied(session.scope, scope) ||
-        prompt === "consent"
+        session &&
+        scopesSatisfied(session.scope, scope) &&
+        prompt !== "consent"
     ) {
-        const oauth2Client = createGoogleOAuth2Client(c.env);
-        const stateData = {
+        const code = crypto.randomUUID();
+        const authCode = {
+            user_id: session.user_id,
+            email: session.email,
+            name: session.name,
+            picture: session.picture,
             client_id,
             redirect_uri,
-            state,
             code_challenge,
             scope,
-        } satisfies StateData;
-
-        const googleAuthUrl = oauth2Client.generateAuthUrl({
-            access_type: "offline", // Request refresh token
-            scope: scope.split(" "),
-            prompt: "consent",
-            state: btoa(JSON.stringify(stateData)),
+            created_at: Date.now(),
+            google_access_token: session.google_access_token,
+            google_refresh_token: session.google_refresh_token,
+            google_token_expiry: session.google_token_expiry,
+        } satisfies AuthCode;
+        await c.env.AUTH_KV_AUTHCODES.put(code, JSON.stringify(authCode), {
+            expirationTtl: Number.parseInt(
+                c.env.CODE_TTL_SECONDS.toString(),
+                10
+            ),
         });
 
-        return c.redirect(googleAuthUrl);
+        const redirectUrl = new URL(redirect_uri);
+        redirectUrl.searchParams.set("code", code);
+        if (state) {
+            redirectUrl.searchParams.set("state", state);
+        }
+        return c.redirect(redirectUrl.toString());
     }
 
-    const code = crypto.randomUUID();
-    const authCode = {
-        user_id: session.user_id,
-        email: session.email,
-        name: session.name,
-        picture: session.picture,
+    // If the prompt is none and we previously did not have a valid session, return an error message
+    if (prompt === "none") {
+        const redirectUrl = new URL(redirect_uri);
+        redirectUrl.searchParams.set("error", "login_required");
+        if (state) {
+            redirectUrl.searchParams.set("state", state);
+        }
+        return c.redirect(redirectUrl.toString());
+    }
+
+    const oauth2Client = createGoogleOAuth2Client(c.env);
+    const stateData = {
         client_id,
         redirect_uri,
+        state,
         code_challenge,
         scope,
-        created_at: Date.now(),
-        google_access_token: session.google_access_token,
-        google_refresh_token: session.google_refresh_token,
-        google_token_expiry: session.google_token_expiry,
-    } satisfies AuthCode;
-    await c.env.AUTH_KV_AUTHCODES.put(code, JSON.stringify(authCode), {
-        expirationTtl: Number.parseInt(c.env.CODE_TTL_SECONDS.toString(), 10),
+    } satisfies StateData;
+
+    const googleAuthUrl = oauth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: scope.split(" "),
+        prompt: "consent",
+        state: btoa(JSON.stringify(stateData)),
     });
 
-    const redirectUrl = new URL(redirect_uri);
-    redirectUrl.searchParams.set("code", code);
-    if (state) {
-        redirectUrl.searchParams.set("state", state);
-    }
-    return c.redirect(redirectUrl.toString());
+    return c.redirect(googleAuthUrl);
 });
 
 export default app;
