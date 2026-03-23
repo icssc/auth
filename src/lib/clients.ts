@@ -146,11 +146,11 @@ export const clients: Record<string, Client> = {
     "anteater-api-key-manager-dev": {
         clientId: "anteater-api-key-manager-dev",
         clientSecret: null,
-        redirectUri: "https://localhost:3000/api/auth/callback/icssc",
+        redirectUri: "http://localhost:3000/api/auth/callback/icssc",
         tokenEndpointAuthMethod: "none",
         name: "Anteater API Key Manager dev",
         allowedDomainPatterns: [
-            "https://localhost:3000",
+            "http://localhost:3000",
         ],
     },
 };
