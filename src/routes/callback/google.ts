@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import * as z from "zod";
+import { validateClient } from "@/lib/clients";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { tryCatch } from "@/lib/try-catch";
@@ -31,6 +32,11 @@ app.get("/", async (c) => {
         return c.json({ error: "invalid_state" }, 400);
     }
     const stateData = parsedStateData.data;
+
+    const client = validateClient(stateData.client_id, stateData.redirect_uri);
+    if (!client) {
+        return c.json({ error: "unauthorized_client" }, 400);
+    }
 
     const oauth2Client = createGoogleOAuth2Client(c.env);
     const { data: tokenResult, error: tokenError } = await tryCatch(
