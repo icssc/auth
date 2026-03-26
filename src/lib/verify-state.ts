@@ -11,6 +11,8 @@ export async function hmacFromSecret(googleSecret: string): Promise<CryptoKey> {
     )
 }
 
+// https://www.technocatgames.com/blog/fast-arraybuffer-to-base64-in-javascript/
+
 export function arrayBufferToBase64(buf: ArrayBuffer): string {
     // widen to utf-16, transmute to string, encode
     return btoa((new TextDecoder("UTF-16")).decode(
