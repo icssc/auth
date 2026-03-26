@@ -3,17 +3,11 @@ import * as z from "zod";
 import { validateClient } from "@/lib/clients";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
+import { StateDataSchema } from "@/lib/schemas/state";
 import { tryCatch } from "@/lib/try-catch";
+import { base64ToArrayBuffer, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
-
-const StateDataSchema = z.object({
-    client_id: z.string(),
-    redirect_uri: z.string(),
-    state: z.string().optional(),
-    code_challenge: z.string(),
-    scope: z.string(),
-});
 
 app.get("/", async (c) => {
     const { code, state: stateParam, error } = c.req.query();
@@ -31,7 +25,21 @@ app.get("/", async (c) => {
     if (!parsedStateData.success) {
         return c.json({ error: "invalid_state" }, 400);
     }
-    const stateData = parsedStateData.data;
+
+    const { digest: stateDataDigest, inner: stateData } = parsedStateData.data;
+    const verifyResult = await tryCatch(
+        crypto.subtle.verify(
+            "HMAC",
+            await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
+            base64ToArrayBuffer(stateDataDigest),
+            (new TextEncoder()).encode(JSON.stringify(stateData))
+        )
+    );
+
+    // the presence of an error implies data === null
+    if (!verifyResult.data) {
+        return c.json({ error: "invalid_state" }, 400);
+    }
 
     const client = validateClient(stateData.client_id, stateData.redirect_uri);
     if (!client) {
