@@ -4,7 +4,7 @@ import { validateClient } from "@/lib/clients";
 import { createGoogleOAuth2Client } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { StateDataSchema } from "@/lib/schemas/state";
-import { tryCatch } from "@/lib/try-catch";
+import { tryCatch, tryCatchSync } from "@/lib/try-catch";
 import { base64ToArrayBuffer, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -28,12 +28,11 @@ app.get("/", async (c) => {
 
     const { digest: stateDataDigest, inner: stateData } = parsedStateData.data;
 
-    let passedSignatureDecode;
-    try {
-        passedSignatureDecode = base64ToArrayBuffer(stateDataDigest);
-    } catch {
+    const passedSignatureDecodeRes = tryCatchSync(() => base64ToArrayBuffer(stateDataDigest));
+    if (passedSignatureDecodeRes.error) {
         return c.json({ error: "invalid_state" }, 400);
     }
+    const passedSignatureDecode = passedSignatureDecodeRes.data
 
     const verifyResult = await tryCatch(
         crypto.subtle.verify(
