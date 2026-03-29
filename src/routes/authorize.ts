@@ -4,6 +4,7 @@ import { createGoogleOAuth2Client } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
 import type { StateData } from "@/lib/schemas/state";
+import { arrayBufferToBase64, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -97,12 +98,22 @@ app.get("/", async (c) => {
     }
 
     const oauth2Client = createGoogleOAuth2Client(c.env);
-    const stateData = {
+    const stateDataInner = {
         client_id,
         redirect_uri,
         state,
         code_challenge,
         scope,
+    };
+
+    const stateData = {
+        digest: await crypto.subtle.sign(
+            "HMAC",
+            await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
+            (new TextEncoder()).encode(JSON.stringify(stateDataInner))
+        )
+            .then(arrayBufferToBase64),
+        inner: stateDataInner,
     } satisfies StateData;
 
     const googleAuthUrl = oauth2Client.generateAuthUrl({
