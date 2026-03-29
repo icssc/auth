@@ -32,7 +32,7 @@ app.get("/", async (c) => {
     if (passedSignatureDecodeRes.error) {
         return c.json({ error: "invalid_state" }, 400);
     }
-    const passedSignatureDecode = passedSignatureDecodeRes.data
+    const passedSignatureDecode = passedSignatureDecodeRes.data;
 
     const verifyResult = await tryCatch(
         crypto.subtle.verify(
