@@ -27,11 +27,19 @@ app.get("/", async (c) => {
     }
 
     const { digest: stateDataDigest, inner: stateData } = parsedStateData.data;
+
+    let passedSignatureDecode;
+    try {
+        passedSignatureDecode = base64ToArrayBuffer(stateDataDigest);
+    } catch {
+        return c.json({ error: "invalid_state" }, 400);
+    }
+
     const verifyResult = await tryCatch(
         crypto.subtle.verify(
             "HMAC",
             await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
-            base64ToArrayBuffer(stateDataDigest),
+            passedSignatureDecode,
             (new TextEncoder()).encode(JSON.stringify(stateData))
         )
     );
