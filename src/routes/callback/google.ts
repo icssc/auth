@@ -46,7 +46,7 @@ app.get("/", async (c) => {
             "HMAC",
             await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
             signatureResult.data,
-            new TextEncoder().encode(JSON.stringify(stateData))
+            new TextEncoder().encode(JSON.stringify(decodeResult.data.inner))
         )
     );
 
