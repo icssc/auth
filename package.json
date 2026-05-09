@@ -7,6 +7,7 @@
         "cf:typegen": "wrangler types --env-interface CloudflareBindings --env-file .dev.vars.example"
     },
     "dependencies": {
+        "@oslojs/encoding": "^1.1.0",
         "arctic": "^3.7.0",
         "dotenv": "^17.2.3",
         "hono": "^4.9.12",

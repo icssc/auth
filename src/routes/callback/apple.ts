@@ -1,7 +1,7 @@
 import { decodeIdToken } from "arctic";
 import { Hono } from "hono";
 import { validateClient } from "@/lib/clients";
-import { createGoogleClient } from "@/lib/oauth";
+import { createAppleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { StateDataSchema } from "@/lib/schemas/state";
 import { tryCatch, tryCatchSync } from "@/lib/try-catch";
@@ -9,11 +9,18 @@ import { base64ToArrayBuffer, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
-app.get("/", async (c) => {
-    const { code, state: stateParam, error } = c.req.query();
+app.post("/", async (c) => {
+    const body = await c.req.parseBody();
+    const code = body.code as string | undefined;
+    const stateParam = body.state as string | undefined;
+    const userParam = body.user as string | undefined;
+    const errorParam = body.error as string | undefined;
 
-    if (error) {
-        return c.json({ error: "google_oauth_error", description: error }, 400);
+    if (errorParam) {
+        return c.json(
+            { error: "apple_oauth_error", description: errorParam },
+            400
+        );
     }
 
     if (!code || !stateParam) {
@@ -31,7 +38,7 @@ app.get("/", async (c) => {
 
     const { digest: stateDataDigest, inner: stateData } = parsedStateData.data;
 
-    if (stateData.provider !== "google") {
+    if (stateData.provider !== "apple") {
         return c.json({ error: "invalid_state" }, 400);
     }
 
@@ -50,7 +57,6 @@ app.get("/", async (c) => {
         )
     );
 
-    // the presence of an error implies data === null
     if (!verifyResult.data) {
         return c.json({ error: "invalid_state" }, 400);
     }
@@ -60,40 +66,69 @@ app.get("/", async (c) => {
         return c.json({ error: "unauthorized_client" }, 400);
     }
 
-    const google = createGoogleClient(c.env);
+    const apple = createAppleClient(c.env);
     const { data: tokens, error: tokenError } = await tryCatch(
-        google.validateAuthorizationCode(code, stateData.code_verifier)
+        apple.validateAuthorizationCode(code)
     );
     if (tokenError || !tokens) {
-        return c.json({ error: "google_token_exchange_failed" }, 500);
+        return c.json({ error: "apple_token_exchange_failed" }, 500);
     }
-
-    const googleAccessToken = tokens.accessToken();
-    const googleTokenExpiry = tokens.accessTokenExpiresAt()?.getTime();
-
-    const googleRefreshToken = tokens.hasRefreshToken()
-        ? tokens.refreshToken()
-        : undefined;
 
     const claims = decodeIdToken(tokens.idToken()) as {
         sub: string;
         email: string;
-        name: string;
-        picture: string;
     };
 
-    const userId = `google_${claims.sub}`;
+    const userId = `apple_${claims.sub}`;
+
+    let userName = claims.email;
+    let userEmail = claims.email;
+
+    if (userParam) {
+        const userResult = tryCatchSync(() => JSON.parse(userParam));
+        if (!userResult.error && userResult.data) {
+            const appleUser = userResult.data as {
+                name?: { firstName?: string; lastName?: string };
+                email?: string;
+            };
+            if (appleUser.name) {
+                const parts = [
+                    appleUser.name.firstName,
+                    appleUser.name.lastName,
+                ].filter(Boolean);
+                if (parts.length > 0) {
+                    userName = parts.join(" ");
+                }
+            }
+            if (appleUser.email) {
+                userEmail = appleUser.email;
+            }
+        }
+    }
+
+    const profileKey = `apple_profile:${claims.sub}`;
+    const existingProfile = await c.env.AUTH_KV_USERS.get(profileKey);
+
+    if (userParam || !existingProfile) {
+        await c.env.AUTH_KV_USERS.put(
+            profileKey,
+            JSON.stringify({ name: userName, email: userEmail })
+        );
+    } else {
+        const profile = JSON.parse(existingProfile) as {
+            name: string;
+            email: string;
+        };
+        userName = profile.name;
+        userEmail = profile.email;
+    }
 
     const sessionId = crypto.randomUUID();
     const sessionData = {
         user_id: userId,
-        email: claims.email,
-        name: claims.name,
-        picture: claims.picture,
-        provider: "google" as const,
-        google_access_token: googleAccessToken,
-        google_refresh_token: googleRefreshToken,
-        google_token_expiry: googleTokenExpiry,
+        email: userEmail,
+        name: userName,
+        provider: "apple",
         scope: stateData.scope,
     };
     const sessionTtl =
@@ -104,21 +139,17 @@ app.get("/", async (c) => {
     });
 
     const authCode = crypto.randomUUID();
-    const codeData = {
-        provider: "google" as const,
+    const codeData: AuthCode = {
+        provider: "apple",
         user_id: userId,
-        email: claims.email,
-        name: claims.name,
-        picture: claims.picture,
+        email: userEmail,
+        name: userName,
         client_id: stateData.client_id,
         redirect_uri: stateData.redirect_uri,
         code_challenge: stateData.code_challenge,
         scope: stateData.scope,
         created_at: Date.now(),
-        google_access_token: googleAccessToken,
-        google_refresh_token: googleRefreshToken,
-        google_token_expiry: googleTokenExpiry,
-    } satisfies AuthCode;
+    };
 
     await c.env.AUTH_KV_AUTHCODES.put(authCode, JSON.stringify(codeData), {
         expirationTtl:
@@ -127,7 +158,9 @@ app.get("/", async (c) => {
 
     const redirectUrl = new URL(stateData.redirect_uri);
     redirectUrl.searchParams.set("code", authCode);
-    if (stateData.state) redirectUrl.searchParams.set("state", stateData.state);
+    if (stateData.state) {
+        redirectUrl.searchParams.set("state", stateData.state);
+    }
 
     const requestUrl = new URL(c.req.url);
     const cookieDomain = requestUrl.hostname;

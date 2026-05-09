@@ -110,6 +110,15 @@ async function handleAuthorizationCodeGrant(
         .setProtectedHeader({ alg: "RS256", kid: keypair.kid })
         .sign(privateKey);
 
+    const googleTokens =
+        authCode.provider === "google"
+            ? {
+                  google_access_token: authCode.google_access_token,
+                  google_refresh_token: authCode.google_refresh_token,
+                  google_token_expiry: authCode.google_token_expiry,
+              }
+            : {};
+
     // Store access token
     await c.env.AUTH_KV_ACCESSTOKENS.put(
         accessToken,
@@ -120,9 +129,7 @@ async function handleAuthorizationCodeGrant(
             picture: authCode.picture,
             scope: authCode.scope,
             exp: now + Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
-            google_access_token: authCode.google_access_token,
-            google_refresh_token: authCode.google_refresh_token,
-            google_token_expiry: authCode.google_token_expiry,
+            ...googleTokens,
         }),
         {
             expirationTtl: Number.parseInt(
@@ -142,7 +149,9 @@ async function handleAuthorizationCodeGrant(
             picture: authCode.picture,
             client_id: authCode.client_id,
             scope: authCode.scope,
-            google_refresh_token: authCode.google_refresh_token,
+            ...(authCode.provider === "google"
+                ? { google_refresh_token: authCode.google_refresh_token }
+                : {}),
         }),
         {
             expirationTtl: Number.parseInt(
@@ -169,14 +178,16 @@ async function handleAuthorizationCodeGrant(
         expires_in: Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
     };
 
-    if (authCode.google_access_token) {
-        response.google_access_token = authCode.google_access_token;
-    }
-    if (authCode.google_refresh_token) {
-        response.google_refresh_token = authCode.google_refresh_token;
-    }
-    if (authCode.google_token_expiry) {
-        response.google_token_expiry = authCode.google_token_expiry;
+    if (authCode.provider === "google") {
+        if (authCode.google_access_token) {
+            response.google_access_token = authCode.google_access_token;
+        }
+        if (authCode.google_refresh_token) {
+            response.google_refresh_token = authCode.google_refresh_token;
+        }
+        if (authCode.google_token_expiry) {
+            response.google_token_expiry = authCode.google_token_expiry;
+        }
     }
 
     return c.json(response, 200, {

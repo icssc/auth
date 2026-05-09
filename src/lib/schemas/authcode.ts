@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const AuthCodeSchema = z.object({
+const BaseAuthCode = z.object({
     user_id: z.string(),
     email: z.string(),
     name: z.string(),
@@ -10,10 +10,22 @@ export const AuthCodeSchema = z.object({
     code_challenge: z.string(),
     scope: z.string(),
     created_at: z.number(),
-    // Google OAuth tokens for accessing Google APIs
+});
+
+const GoogleAuthCode = BaseAuthCode.extend({
+    provider: z.literal("google"),
     google_access_token: z.string().optional(),
     google_refresh_token: z.string().optional(),
-    google_token_expiry: z.number().optional(), // Unix timestamp in milliseconds
+    google_token_expiry: z.number().optional(),
 });
+
+const AppleAuthCode = BaseAuthCode.extend({
+    provider: z.literal("apple"),
+});
+
+export const AuthCodeSchema = z.discriminatedUnion("provider", [
+    GoogleAuthCode,
+    AppleAuthCode,
+]);
 
 export type AuthCode = z.infer<typeof AuthCodeSchema>;

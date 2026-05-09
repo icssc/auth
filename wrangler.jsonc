@@ -36,6 +36,11 @@
             "id": "e59eb162e4bf46a4bd36ed7c9d2358a4",
             "remote": true,
         },
+        {
+            "binding": "AUTH_KV_USERS",
+            "id": "f1e3917e1eb24b60a818faff8a463a30",
+            "remote": true,
+        },
     ],
     "vars": {
         "ISSUER": "https://auth.icssc.club",
@@ -45,6 +50,10 @@
         "SESSION_TTL_SECONDS": 1209600,
         "GOOGLE_REDIRECT_URI": "https://auth.icssc.club/callback/google",
         "GOOGLE_CLIENT_ID": "307305155433-2hojkb6tgl16c6qpsf40dfhst29av5hm.apps.googleusercontent.com",
+        "APPLE_CLIENT_ID": "com.icssc.auth",
+        "APPLE_TEAM_ID": "66682RDDDK",
+        "APPLE_KEY_ID": "432Q2H2SLP",
+        "APPLE_REDIRECT_URI": "https://auth.icssc.club/callback/apple",
     },
     "observability": {
         "logs": {
