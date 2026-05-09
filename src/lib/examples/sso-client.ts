@@ -136,10 +136,8 @@ export async function autoSignIn(options: AutoSignInOptions): Promise<void> {
  * }
  * ```
  */
-export interface UseAutoSignInOptions extends Omit<
-    AutoSignInOptions,
-    "isLoggedIn" | "triggerSignIn"
-> {
+export interface UseAutoSignInOptions
+    extends Omit<AutoSignInOptions, "isLoggedIn" | "triggerSignIn"> {
     isLoggedIn: () => boolean;
     triggerSignIn: () => void | Promise<void>;
     /** Whether to enable auto sign in. Default: true */

@@ -122,7 +122,10 @@ export const clients: Record<string, Client> = {
         redirectUri: "https://clone.zotnfound.com/api/auth/callback",
         tokenEndpointAuthMethod: "none",
         name: "ZotNFound Clone",
-        allowedDomainPatterns: ["https://clone.zotnfound.com", "https://staging-*.zotnfound.com"],
+        allowedDomainPatterns: [
+            "https://clone.zotnfound.com",
+            "https://staging-*.zotnfound.com",
+        ],
     },
     "zotnfound-dev": {
         clientId: "zotnfound-dev",
@@ -135,7 +138,8 @@ export const clients: Record<string, Client> = {
     "anteater-api-key-manager": {
         clientId: "anteater-api-key-manager",
         clientSecret: null,
-        redirectUri: "https://dashboard.anteaterapi.com/api/auth/callback/icssc",
+        redirectUri:
+            "https://dashboard.anteaterapi.com/api/auth/callback/icssc",
         tokenEndpointAuthMethod: "none",
         name: "Anteater API Key Manager",
         allowedDomainPatterns: [
@@ -149,9 +153,7 @@ export const clients: Record<string, Client> = {
         redirectUri: "http://localhost:3000/api/auth/callback/icssc",
         tokenEndpointAuthMethod: "none",
         name: "Anteater API Key Manager dev",
-        allowedDomainPatterns: [
-            "http://localhost:3000",
-        ],
+        allowedDomainPatterns: ["http://localhost:3000"],
     },
 };
 

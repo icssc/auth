@@ -10,9 +10,7 @@ type Failure<E> = {
 
 type Result<T, E = Error> = Success<T> | Failure<E>;
 
-export function tryCatchSync<T, E = Error>(
-    fn: () => T
-): Result<T, E> {
+export function tryCatchSync<T, E = Error>(fn: () => T): Result<T, E> {
     try {
         return { data: fn(), error: null };
     } catch (error) {
