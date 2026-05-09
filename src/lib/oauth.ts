@@ -10,8 +10,10 @@ export function createGoogleClient(env: CloudflareBindings): Google {
 }
 
 export function createAppleClient(env: CloudflareBindings): Apple {
-    const base64 = env.APPLE_PRIVATE_KEY
-        .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    const base64 = env.APPLE_PRIVATE_KEY.replace(
+        /-----BEGIN PRIVATE KEY-----/,
+        ""
+    )
         .replace(/-----END PRIVATE KEY-----/, "")
         .replace(/\s/g, "");
     const privateKey = decodeBase64(base64);

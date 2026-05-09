@@ -1,13 +1,11 @@
 import { generateCodeVerifier } from "arctic";
 import { Hono } from "hono";
+import { signOAuthStateParam } from "@/lib/auth/oauth-callback";
 import { validateClient } from "@/lib/clients";
 import { createAppleClient, createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
 import { type Provider } from "@/lib/schemas/providers";
-import type { StateData } from "@/lib/schemas/state";
-import { tryCatchSync } from "@/lib/try-catch";
-import { arrayBufferToBase64, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -164,26 +162,16 @@ app.get("/", async (c) => {
                 code_verifier: codeVerifier,
             };
 
-            const stateData = {
-                digest: await crypto.subtle
-                    .sign(
-                        "HMAC",
-                        await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
-                        new TextEncoder().encode(JSON.stringify(stateDataInner))
-                    )
-                    .then(arrayBufferToBase64),
-                inner: stateDataInner,
-            } satisfies StateData;
-
-            const stateParamResult = tryCatchSync(() =>
-                btoa(JSON.stringify(stateData))
+            const stateParamResult = await signOAuthStateParam(
+                stateDataInner,
+                c.env.GOOGLE_CLIENT_SECRET
             );
-            if (stateParamResult.error) {
+            if (!stateParamResult.ok) {
                 return c.json({ error: "invalid_state" }, 400);
             }
 
             const googleAuthUrl = google.createAuthorizationURL(
-                stateParamResult.data,
+                stateParamResult.stateParam,
                 codeVerifier,
                 scopes
             );
@@ -204,26 +192,16 @@ app.get("/", async (c) => {
                 scope,
             };
 
-            const stateData = {
-                digest: await crypto.subtle
-                    .sign(
-                        "HMAC",
-                        await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
-                        new TextEncoder().encode(JSON.stringify(stateDataInner))
-                    )
-                    .then(arrayBufferToBase64),
-                inner: stateDataInner,
-            } satisfies StateData;
-
-            const stateParamResult = tryCatchSync(() =>
-                btoa(JSON.stringify(stateData))
+            const stateParamResult = await signOAuthStateParam(
+                stateDataInner,
+                c.env.GOOGLE_CLIENT_SECRET
             );
-            if (stateParamResult.error) {
+            if (!stateParamResult.ok) {
                 return c.json({ error: "invalid_state" }, 400);
             }
 
             const appleAuthUrl = apple.createAuthorizationURL(
-                stateParamResult.data,
+                stateParamResult.stateParam,
                 ["name", "email"]
             );
             appleAuthUrl.searchParams.set("response_mode", "form_post");
