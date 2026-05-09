@@ -7,8 +7,8 @@
         "cf:typegen": "wrangler types --env-interface CloudflareBindings --env-file .dev.vars.example"
     },
     "dependencies": {
+        "arctic": "^3.7.0",
         "dotenv": "^17.2.3",
-        "google-auth-library": "^10.5.0",
         "hono": "^4.9.12",
         "jose": "^6.1.0",
         "zod": "^4.1.12"

@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { Hono } from "hono";
 import { importJWK, SignJWT } from "jose";
 import * as z from "zod";
+import { createGoogleClient } from "@/lib/oauth";
 import { AuthCodeSchema } from "@/lib/schemas/authcode";
 import { KeyPairSchema } from "@/lib/schemas/keypair";
 import { TokenRequestSchema } from "@/lib/schemas/token";
@@ -223,37 +224,14 @@ async function handleRefreshTokenGrant(
     // If we have a Google refresh token, refresh it
     if (refreshData.google_refresh_token) {
         try {
-            const googleResponse = await fetch(
-                "https://oauth2.googleapis.com/token",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: new URLSearchParams({
-                        grant_type: "refresh_token",
-                        refresh_token: refreshData.google_refresh_token,
-                        client_id: c.env.GOOGLE_CLIENT_ID,
-                        client_secret: c.env.GOOGLE_CLIENT_SECRET,
-                    }),
-                }
+            const google = createGoogleClient(c.env);
+            const tokens = await google.refreshAccessToken(
+                refreshData.google_refresh_token
             );
-
-            if (googleResponse.ok) {
-                const googleData = (await googleResponse.json()) as {
-                    access_token?: string;
-                    expires_in?: number;
-                };
-                newGoogleAccessToken = googleData.access_token;
-                // Google returns expires_in in seconds
-                newGoogleTokenExpiry =
-                    Date.now() + (googleData.expires_in ?? 3600) * 1000;
-            } else {
-                console.error(
-                    "Failed to refresh Google token:",
-                    await googleResponse.text()
-                );
-            }
+            newGoogleAccessToken = tokens.accessToken();
+            newGoogleTokenExpiry =
+                tokens.accessTokenExpiresAt()?.getTime() ??
+                Date.now() + 3600 * 1000;
         } catch (error) {
             console.error("Error refreshing Google token:", error);
         }

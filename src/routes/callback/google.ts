@@ -1,7 +1,7 @@
+import { decodeIdToken } from "arctic";
 import { Hono } from "hono";
-import * as z from "zod";
 import { validateClient } from "@/lib/clients";
-import { createGoogleOAuth2Client } from "@/lib/oauth";
+import { createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { StateDataSchema } from "@/lib/schemas/state";
 import { tryCatch, tryCatchSync } from "@/lib/try-catch";
@@ -20,26 +20,28 @@ app.get("/", async (c) => {
         return c.json({ error: "invalid_request" }, 400);
     }
 
-    const decoded = JSON.parse(atob(stateParam));
-    const parsedStateData = StateDataSchema.safeParse(decoded);
+    const decodeResult = tryCatchSync(() => JSON.parse(atob(stateParam)));
+    if (decodeResult.error) {
+        return c.json({ error: "invalid_state" }, 400);
+    }
+    const parsedStateData = StateDataSchema.safeParse(decodeResult.data);
     if (!parsedStateData.success) {
         return c.json({ error: "invalid_state" }, 400);
     }
 
     const { digest: stateDataDigest, inner: stateData } = parsedStateData.data;
-
-    const passedSignatureDecodeRes = tryCatchSync(() => base64ToArrayBuffer(stateDataDigest));
-    if (passedSignatureDecodeRes.error) {
+    const signatureResult = tryCatchSync(() =>
+        base64ToArrayBuffer(stateDataDigest)
+    );
+    if (signatureResult.error) {
         return c.json({ error: "invalid_state" }, 400);
     }
-    const passedSignatureDecode = passedSignatureDecodeRes.data;
-
     const verifyResult = await tryCatch(
         crypto.subtle.verify(
             "HMAC",
             await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
-            passedSignatureDecode,
-            (new TextEncoder()).encode(JSON.stringify(stateData))
+            signatureResult.data,
+            new TextEncoder().encode(JSON.stringify(stateData))
         )
     );
 
@@ -53,42 +55,36 @@ app.get("/", async (c) => {
         return c.json({ error: "unauthorized_client" }, 400);
     }
 
-    const oauth2Client = createGoogleOAuth2Client(c.env);
-    const { data: tokenResult, error: tokenError } = await tryCatch(
-        oauth2Client.getToken(code)
+    const google = createGoogleClient(c.env);
+    const { data: tokens, error: tokenError } = await tryCatch(
+        google.validateAuthorizationCode(code, stateData.code_verifier)
     );
-    if (tokenError || !tokenResult) {
+    if (tokenError || !tokens) {
         return c.json({ error: "google_token_exchange_failed" }, 500);
     }
 
-    oauth2Client.setCredentials(tokenResult.tokens);
-    const { data: userInfoResult, error: userInfoError } = await tryCatch(
-        oauth2Client.request<{
-            id: string;
-            email: string;
-            name: string;
-            picture: string;
-        }>({
-            url: "https://www.googleapis.com/oauth2/v2/userinfo",
-        })
-    );
-    if (userInfoError || !userInfoResult) {
-        return c.json({ error: "google_userinfo_failed" }, 500);
-    }
+    const googleAccessToken = tokens.accessToken();
+    const googleTokenExpiry = tokens.accessTokenExpiresAt()?.getTime();
 
-    const userInfo = userInfoResult.data;
-    const userId = `google_${userInfo.id}`;
+    const googleRefreshToken = tokens.hasRefreshToken()
+        ? tokens.refreshToken()
+        : undefined;
 
-    const googleAccessToken = tokenResult.tokens.access_token ?? undefined;
-    const googleRefreshToken = tokenResult.tokens.refresh_token ?? undefined;
-    const googleTokenExpiry = tokenResult.tokens.expiry_date ?? undefined;
+    const claims = decodeIdToken(tokens.idToken()) as {
+        sub: string;
+        email: string;
+        name: string;
+        picture: string;
+    };
+
+    const userId = `google_${claims.sub}`;
 
     const sessionId = crypto.randomUUID();
     const sessionData = {
         user_id: userId,
-        email: userInfo.email,
-        name: userInfo.name,
-        picture: userInfo.picture,
+        email: claims.email,
+        name: claims.name,
+        picture: claims.picture,
         google_access_token: googleAccessToken,
         google_refresh_token: googleRefreshToken,
         google_token_expiry: googleTokenExpiry,
@@ -104,9 +100,9 @@ app.get("/", async (c) => {
     const authCode = crypto.randomUUID();
     const codeData = {
         user_id: userId,
-        email: userInfo.email,
-        name: userInfo.name,
-        picture: userInfo.picture,
+        email: claims.email,
+        name: claims.name,
+        picture: claims.picture,
         client_id: stateData.client_id,
         redirect_uri: stateData.redirect_uri,
         code_challenge: stateData.code_challenge,

@@ -1,14 +1,9 @@
-import { OAuth2Client } from "google-auth-library";
+import { Google } from "arctic";
 
-/**
- * Creates a configured Google OAuth2 client
- */
-export function createGoogleOAuth2Client(
-    env: CloudflareBindings
-): OAuth2Client {
-    return new OAuth2Client({
-        clientId: env.GOOGLE_CLIENT_ID,
-        clientSecret: env.GOOGLE_CLIENT_SECRET,
-        redirectUri: env.GOOGLE_REDIRECT_URI,
-    });
+export function createGoogleClient(env: CloudflareBindings): Google {
+    return new Google(
+        env.GOOGLE_CLIENT_ID,
+        env.GOOGLE_CLIENT_SECRET,
+        env.GOOGLE_REDIRECT_URI
+    );
 }

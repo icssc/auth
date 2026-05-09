@@ -8,7 +8,8 @@ export const StateDataSchema = z.object({
         state: z.string().optional(),
         code_challenge: z.string(),
         scope: z.string(),
-    })
+        code_verifier: z.string(),
+    }),
 });
 
 export type StateData = z.infer<typeof StateDataSchema>;

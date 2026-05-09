@@ -1,9 +1,11 @@
+import { generateCodeVerifier } from "arctic";
 import { Hono } from "hono";
 import { validateClient } from "@/lib/clients";
-import { createGoogleOAuth2Client } from "@/lib/oauth";
+import { createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
 import type { StateData } from "@/lib/schemas/state";
+import { tryCatchSync } from "@/lib/try-catch";
 import { arrayBufferToBase64, hmacFromSecret } from "@/lib/verify-state";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -97,33 +99,45 @@ app.get("/", async (c) => {
         return c.redirect(redirectUrl.toString());
     }
 
-    const oauth2Client = createGoogleOAuth2Client(c.env);
+    const codeVerifier = generateCodeVerifier();
+    const google = createGoogleClient(c.env);
+
     const stateDataInner = {
         client_id,
         redirect_uri,
         state,
         code_challenge,
         scope,
+        code_verifier: codeVerifier,
     };
 
     const stateData = {
-        digest: await crypto.subtle.sign(
-            "HMAC",
-            await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
-            (new TextEncoder()).encode(JSON.stringify(stateDataInner))
-        )
+        digest: await crypto.subtle
+            .sign(
+                "HMAC",
+                await hmacFromSecret(c.env.GOOGLE_CLIENT_SECRET),
+                new TextEncoder().encode(JSON.stringify(stateDataInner))
+            )
             .then(arrayBufferToBase64),
         inner: stateDataInner,
     } satisfies StateData;
 
-    const googleAuthUrl = oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: scope.split(" "),
-        prompt: "consent",
-        state: btoa(JSON.stringify(stateData)),
-    });
+    const stateParamResult = tryCatchSync(() =>
+        btoa(JSON.stringify(stateData))
+    );
+    if (stateParamResult.error) {
+        return c.json({ error: "invalid_state" }, 400);
+    }
 
-    return c.redirect(googleAuthUrl);
+    const googleAuthUrl = google.createAuthorizationURL(
+        stateParamResult.data,
+        codeVerifier,
+        scope.split(" ")
+    );
+    googleAuthUrl.searchParams.set("access_type", "offline");
+    googleAuthUrl.searchParams.set("prompt", "consent");
+
+    return c.redirect(googleAuthUrl.toString());
 });
 
 export default app;
