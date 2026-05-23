@@ -30,6 +30,8 @@ app.get("/.well-known/openid-configuration", (c) => {
             "profile",
             "email",
             "https://www.googleapis.com/auth/calendar.readonly",
+            "https://www.googleapis.com/auth/calendar.events",
+            "https://www.googleapis.com/auth/calendar.events.readonly",
         ],
         response_types_supported: ["code"],
         grant_types_supported: ["authorization_code", "refresh_token"],
