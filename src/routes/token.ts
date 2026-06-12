@@ -45,7 +45,7 @@ async function handleAuthorizationCodeGrant(
     c: any,
     request: {
         code: string;
-        client_id?: string;
+        client_id: string;
         redirect_uri: string;
         code_verifier: string;
     }
@@ -62,7 +62,7 @@ async function handleAuthorizationCodeGrant(
     }
     const authCode = parsedAuthCode.data;
 
-    if (client_id && authCode.client_id !== client_id) {
+    if (authCode.client_id !== client_id) {
         return c.json({ error: "invalid_authorization_code_client_id" }, 400);
     }
 
@@ -202,7 +202,7 @@ async function handleAuthorizationCodeGrant(
  */
 async function handleRefreshTokenGrant(
     c: any,
-    request: { refresh_token: string; client_id?: string }
+    request: { refresh_token: string; client_id: string }
 ) {
     const { refresh_token, client_id } = request;
 
@@ -224,8 +224,7 @@ async function handleRefreshTokenGrant(
         return c.json({ error: "invalid_grant" }, 400);
     }
 
-    // Validate client_id if provided
-    if (client_id && refreshData.client_id !== client_id) {
+    if (refreshData.client_id !== client_id) {
         return c.json({ error: "invalid_grant" }, 400);
     }
 

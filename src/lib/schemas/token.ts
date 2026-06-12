@@ -5,7 +5,7 @@ const AuthorizationCodeGrantSchema = z.object({
     grant_type: z.literal("authorization_code"),
     code: z.string(),
     redirect_uri: z.string().url(),
-    client_id: z.string().optional(),
+    client_id: z.string(),
     code_verifier: z.string(),
 });
 
@@ -13,7 +13,7 @@ const AuthorizationCodeGrantSchema = z.object({
 const RefreshTokenGrantSchema = z.object({
     grant_type: z.literal("refresh_token"),
     refresh_token: z.string(),
-    client_id: z.string().optional(),
+    client_id: z.string(),
 });
 
 // Union of both grant types
