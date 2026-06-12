@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { isAllowedRedirectUrl } from "@/lib/clients";
+import { isAllowedRedirectUrl } from "@/lib/clients/validate";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 

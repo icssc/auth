@@ -1,4 +1,4 @@
-import { validateClient } from "@/lib/clients";
+import { validateClient } from "@/lib/clients/validate";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import type { Provider } from "@/lib/schemas/providers";
 import type { StateInner } from "@/lib/schemas/state";

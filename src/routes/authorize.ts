@@ -1,7 +1,7 @@
 import { generateCodeVerifier } from "arctic";
 import { Hono } from "hono";
 import { signOAuthStateParam } from "@/lib/auth/oauth-callback";
-import { validateClient } from "@/lib/clients";
+import { validateClient } from "@/lib/clients/validate";
 import { createAppleClient, createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
