@@ -38,12 +38,12 @@ export const clients: Record<string, Client> = {
             "https://staging-shared.antalmanac.com",
             "https://scheduler-*.antalmanac.com",
         ],
-        oauthPaths: ["/auth", "/auth/native"],
+        oauthPaths: ["/api/auth/oauth2/callback/icssc"],
     }),
     "antalmanac-dev": register({
         clientId: "antalmanac-dev",
         hosts: ["http://localhost:3000"],
-        oauthPaths: ["/auth", "/auth/native"],
+        oauthPaths: ["/api/auth/oauth2/callback/icssc"],
     }),
     peterportal: register({
         clientId: "peterportal",
@@ -69,12 +69,12 @@ export const clients: Record<string, Client> = {
     peterplate: register({
         clientId: "peterplate",
         hosts: ["https://peterplate.com", "https://staging-*.peterplate.com"],
-        oauthPaths: ["/auth", "/auth/native"],
+        oauthPaths: ["/api/auth/oauth2/callback/icssc"],
     }),
     "peterplate-dev": register({
         clientId: "peterplate-dev",
         hosts: ["http://localhost:3000"],
-        oauthPaths: ["/auth", "/auth/native"],
+        oauthPaths: ["/api/auth/oauth2/callback/icssc"],
     }),
     zotmeet: register({
         clientId: "zotmeet",
