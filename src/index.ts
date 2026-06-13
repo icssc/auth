@@ -37,9 +37,20 @@ app.get("/.well-known/openid-configuration", (c) => {
         grant_types_supported: ["authorization_code", "refresh_token"],
         subject_types_supported: ["public"],
         id_token_signing_alg_values_supported: ["RS256"],
-        token_endpoint_auth_methods_supported: ["none", "client_secret_basic"],
+        end_session_endpoint: `${iss}/logout`,
+        token_endpoint_auth_methods_supported: ["none"],
         code_challenge_methods_supported: ["S256"],
-        claims_supported: ["sub", "iss", "aud", "exp", "iat", "name", "email"],
+        claims_supported: [
+            "sub",
+            "iss",
+            "aud",
+            "exp",
+            "iat",
+            "name",
+            "email",
+            "picture",
+            "nonce",
+        ],
     };
 
     return c.json(config, 200, {
