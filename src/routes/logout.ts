@@ -1,17 +1,10 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { isAllowedRedirectUrl } from "@/lib/clients/validate";
+import { registeredClientCors } from "@/lib/cors";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
-app.use(
-    "/*",
-    cors({
-        origin: (origin) => origin,
-        allowMethods: ["GET", "POST", "OPTIONS"],
-        credentials: true,
-    })
-);
+app.use("/*", registeredClientCors);
 
 const logoutHandler = async (c: any) => {
     const cookie = c.req.header("Cookie") ?? "";
