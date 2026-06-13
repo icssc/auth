@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { isAllowedRedirectUrl } from "@/lib/clients/validate";
 import { registeredClientCors } from "@/lib/cors";
+import { SessionSchema } from "@/lib/schemas/session";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -20,7 +21,12 @@ app.get("/", async (c) => {
         return c.json({ valid: false }, 401);
     }
 
-    const session = JSON.parse(sessionData);
+    const parsed = SessionSchema.safeParse(JSON.parse(sessionData));
+    if (!parsed.success) {
+        return c.json({ valid: false }, 401);
+    }
+
+    const session = parsed.data;
     return c.json(
         {
             valid: true,
@@ -63,14 +69,17 @@ app.get("/check", async (c) => {
     if (sid) {
         const sessionData = await c.env.AUTH_KV_SESSIONS.get(sid);
         if (sessionData) {
-            const session = JSON.parse(sessionData);
-            sessionValid = true;
-            user = {
-                id: session.user_id,
-                email: session.email,
-                name: session.name,
-                picture: session.picture,
-            };
+            const parsed = SessionSchema.safeParse(JSON.parse(sessionData));
+            if (parsed.success) {
+                const session = parsed.data;
+                sessionValid = true;
+                user = {
+                    id: session.user_id,
+                    email: session.email,
+                    name: session.name,
+                    picture: session.picture,
+                };
+            }
         }
     }
 

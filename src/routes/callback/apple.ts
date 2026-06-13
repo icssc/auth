@@ -5,6 +5,7 @@ import {
     verifyOAuthCallbackState,
 } from "@/lib/auth/oauth-callback";
 import { createAppleClient } from "@/lib/oauth";
+import { AppleProfileSchema, AppleUserSchema } from "@/lib/schemas/apple-user";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { tryCatch, tryCatchSync } from "@/lib/try-catch";
 
@@ -60,21 +61,21 @@ app.post("/", async (c) => {
     if (userParam) {
         const userResult = tryCatchSync(() => JSON.parse(userParam));
         if (!userResult.error && userResult.data) {
-            const appleUser = userResult.data as {
-                name?: { firstName?: string; lastName?: string };
-                email?: string;
-            };
-            if (appleUser.name) {
-                const parts = [
-                    appleUser.name.firstName,
-                    appleUser.name.lastName,
-                ].filter(Boolean);
-                if (parts.length > 0) {
-                    userName = parts.join(" ");
+            const parsed = AppleUserSchema.safeParse(userResult.data);
+            if (parsed.success) {
+                const appleUser = parsed.data;
+                if (appleUser.name) {
+                    const parts = [
+                        appleUser.name.firstName,
+                        appleUser.name.lastName,
+                    ].filter(Boolean);
+                    if (parts.length > 0) {
+                        userName = parts.join(" ");
+                    }
                 }
-            }
-            if (appleUser.email) {
-                userEmail = appleUser.email;
+                if (appleUser.email) {
+                    userEmail = appleUser.email;
+                }
             }
         }
     }
@@ -88,12 +89,13 @@ app.post("/", async (c) => {
             JSON.stringify({ name: userName, email: userEmail })
         );
     } else {
-        const profile = JSON.parse(existingProfile) as {
-            name: string;
-            email: string;
-        };
-        userName = profile.name;
-        userEmail = profile.email;
+        const parsed = AppleProfileSchema.safeParse(
+            JSON.parse(existingProfile)
+        );
+        if (parsed.success) {
+            userName = parsed.data.name;
+            userEmail = parsed.data.email;
+        }
     }
 
     const sessionData = {

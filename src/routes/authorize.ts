@@ -5,7 +5,7 @@ import { validateClient } from "@/lib/clients/validate";
 import { createAppleClient, createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
-import { type Provider } from "@/lib/schemas/providers";
+import { type Session, SessionSchema } from "@/lib/schemas/session";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -51,22 +51,15 @@ app.get("/", async (c) => {
     const sidMatch = /sid=([^;]+)/.exec(cookie);
     const sid = sidMatch?.[1];
 
-    let session: {
-        user_id: string;
-        email: string;
-        name: string;
-        picture?: string;
-        provider?: Provider;
-        google_access_token?: string;
-        google_refresh_token?: string;
-        google_token_expiry?: number;
-        scope: string;
-    } | null = null;
+    let session: Session | null = null;
 
     if (sid) {
         const sessionData = await c.env.AUTH_KV_SESSIONS.get(sid);
         if (sessionData) {
-            session = JSON.parse(sessionData);
+            const parsed = SessionSchema.safeParse(JSON.parse(sessionData));
+            if (parsed.success) {
+                session = parsed.data;
+            }
         }
     }
 
@@ -82,7 +75,7 @@ app.get("/", async (c) => {
         prompt !== "consent"
     ) {
         const code = crypto.randomUUID();
-        const sessionProvider = session.provider ?? "google";
+        const sessionProvider = session.provider;
 
         let authCode: AuthCode;
         switch (sessionProvider) {
