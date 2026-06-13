@@ -10,6 +10,23 @@ import { type Session, SessionSchema } from "@/lib/schemas/session";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
+function errorRedirect(
+    redirectUri: string,
+    error: string,
+    state?: string,
+    errorDescription?: string
+) {
+    const url = new URL(redirectUri);
+    url.searchParams.set("error", error);
+    if (errorDescription) {
+        url.searchParams.set("error_description", errorDescription);
+    }
+    if (state) {
+        url.searchParams.set("state", state);
+    }
+    return url.toString();
+}
+
 app.get("/", async (c) => {
     const query = c.req.query();
     const parsed = AuthorizeQuerySchema.safeParse(query);
@@ -27,25 +44,29 @@ app.get("/", async (c) => {
         provider,
     } = parsed.data;
 
+    // Validate client+redirect_uri first — errors before this point
+    // cannot be redirected because the redirect_uri is not yet trusted.
+    const client = validateClient(client_id, redirect_uri);
+    if (!client) {
+        return c.json({ error: "unauthorized_client" }, 400);
+    }
+
+    // From here on, redirect_uri is validated — errors are returned
+    // via redirect per OIDC Core §3.1.2.6.
     const scopes = scope.split(" ");
 
     if (
         provider !== "google" &&
         scopes.some((s) => s.startsWith("https://www.googleapis.com/"))
     ) {
-        return c.json(
-            {
-                error: "invalid_scope",
-                error_description:
-                    "Google-specific scopes can only be used with the Google provider",
-            },
-            400
+        return c.redirect(
+            errorRedirect(
+                redirect_uri,
+                "invalid_scope",
+                state,
+                "Google-specific scopes can only be used with the Google provider"
+            )
         );
-    }
-
-    const client = validateClient(client_id, redirect_uri);
-    if (!client) {
-        return c.json({ error: "unauthorized_client" }, 400);
     }
 
     const cookie = c.req.header("Cookie") ?? "";
@@ -110,7 +131,9 @@ app.get("/", async (c) => {
                 break;
             default: {
                 const _exhaustive: never = sessionProvider;
-                return c.json({ error: "invalid_provider" }, 400);
+                return c.redirect(
+                    errorRedirect(redirect_uri, "server_error", state)
+                );
             }
         }
 
@@ -130,12 +153,7 @@ app.get("/", async (c) => {
     }
 
     if (prompt === "none") {
-        const redirectUrl = new URL(redirect_uri);
-        redirectUrl.searchParams.set("error", "login_required");
-        if (state) {
-            redirectUrl.searchParams.set("state", state);
-        }
-        return c.redirect(redirectUrl.toString());
+        return c.redirect(errorRedirect(redirect_uri, "login_required", state));
     }
 
     switch (provider) {
@@ -158,7 +176,9 @@ app.get("/", async (c) => {
                 c.env.STATE_SIGNING_SECRET
             );
             if (!stateParamResult.ok) {
-                return c.json({ error: "invalid_state" }, 400);
+                return c.redirect(
+                    errorRedirect(redirect_uri, "server_error", state)
+                );
             }
 
             const googleAuthUrl = google.createAuthorizationURL(
@@ -188,7 +208,9 @@ app.get("/", async (c) => {
                 c.env.STATE_SIGNING_SECRET
             );
             if (!stateParamResult.ok) {
-                return c.json({ error: "invalid_state" }, 400);
+                return c.redirect(
+                    errorRedirect(redirect_uri, "server_error", state)
+                );
             }
 
             const appleAuthUrl = apple.createAuthorizationURL(
@@ -201,7 +223,9 @@ app.get("/", async (c) => {
         }
         default: {
             const _exhaustive: never = provider;
-            return c.json({ error: "invalid_provider" }, 400);
+            return c.redirect(
+                errorRedirect(redirect_uri, "server_error", state)
+            );
         }
     }
 });
