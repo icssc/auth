@@ -31,7 +31,7 @@ app.post("/", async (c) => {
     const stateResult = await verifyOAuthCallbackState(
         stateParam,
         "apple",
-        c.env.GOOGLE_CLIENT_SECRET
+        c.env.STATE_SIGNING_SECRET
     );
     if (!stateResult.ok) {
         return c.json({ error: stateResult.error }, 400);

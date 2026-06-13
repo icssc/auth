@@ -25,6 +25,7 @@ declare namespace Cloudflare {
 		APPLE_REDIRECT_URI: "https://auth.icssc.club/callback/apple";
 		GOOGLE_CLIENT_SECRET: string;
 		APPLE_PRIVATE_KEY: string;
+		STATE_SIGNING_SECRET: string;
 	}
 }
 interface CloudflareBindings extends Cloudflare.Env {}
@@ -32,7 +33,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ISSUER" | "TOKEN_TTL_SECONDS" | "CODE_TTL_SECONDS" | "REFRESH_TTL_SECONDS" | "SESSION_TTL_SECONDS" | "GOOGLE_REDIRECT_URI" | "GOOGLE_CLIENT_ID" | "APPLE_CLIENT_ID" | "APPLE_TEAM_ID" | "APPLE_KEY_ID" | "APPLE_REDIRECT_URI" | "GOOGLE_CLIENT_SECRET" | "APPLE_PRIVATE_KEY">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ISSUER" | "TOKEN_TTL_SECONDS" | "CODE_TTL_SECONDS" | "REFRESH_TTL_SECONDS" | "SESSION_TTL_SECONDS" | "GOOGLE_REDIRECT_URI" | "GOOGLE_CLIENT_ID" | "APPLE_CLIENT_ID" | "APPLE_TEAM_ID" | "APPLE_KEY_ID" | "APPLE_REDIRECT_URI" | "GOOGLE_CLIENT_SECRET" | "APPLE_PRIVATE_KEY" | "STATE_SIGNING_SECRET">> {}
 }
 
 // Begin runtime types

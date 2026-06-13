@@ -164,7 +164,7 @@ app.get("/", async (c) => {
 
             const stateParamResult = await signOAuthStateParam(
                 stateDataInner,
-                c.env.GOOGLE_CLIENT_SECRET
+                c.env.STATE_SIGNING_SECRET
             );
             if (!stateParamResult.ok) {
                 return c.json({ error: "invalid_state" }, 400);
@@ -194,7 +194,7 @@ app.get("/", async (c) => {
 
             const stateParamResult = await signOAuthStateParam(
                 stateDataInner,
-                c.env.GOOGLE_CLIENT_SECRET
+                c.env.STATE_SIGNING_SECRET
             );
             if (!stateParamResult.ok) {
                 return c.json({ error: "invalid_state" }, 400);
