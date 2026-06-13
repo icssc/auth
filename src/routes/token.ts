@@ -192,6 +192,7 @@ async function handleAuthorizationCodeGrant(
         refresh_token: string;
         id_token: string;
         expires_in: number;
+        scope: string;
         google_access_token?: string;
         google_refresh_token?: string;
         google_token_expiry?: number;
@@ -201,6 +202,7 @@ async function handleAuthorizationCodeGrant(
         refresh_token: refreshToken,
         id_token: idToken,
         expires_in: Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
+        scope: authCode.scope,
     };
 
     if (authCode.provider === "google") {
@@ -348,6 +350,7 @@ async function handleRefreshTokenGrant(
         access_token: string;
         id_token: string;
         expires_in: number;
+        scope: string;
         google_access_token?: string;
         google_refresh_token?: string;
         google_token_expiry?: number;
@@ -356,6 +359,7 @@ async function handleRefreshTokenGrant(
         access_token: newAccessToken,
         id_token: idToken,
         expires_in: Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
+        scope: refreshData.scope,
     };
 
     if (newGoogleAccessToken) {
