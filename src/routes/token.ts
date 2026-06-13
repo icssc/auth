@@ -54,21 +54,39 @@ async function handleAuthorizationCodeGrant(
 
     const rawAuthCode = await c.env.AUTH_KV_AUTHCODES.get(code, "json");
     if (!rawAuthCode) {
-        return c.json({ error: "invalid_authorization_code" }, 400);
+        return c.json(
+            {
+                error: "invalid_grant",
+                error_description: "authorization code is invalid or expired",
+            },
+            400
+        );
     }
     const parsedAuthCode = AuthCodeSchema.safeParse(rawAuthCode);
     if (!parsedAuthCode.success) {
-        return c.json({ error: "invalid_authorization_code" }, 400);
+        return c.json(
+            {
+                error: "invalid_grant",
+                error_description: "authorization code is malformed",
+            },
+            400
+        );
     }
     const authCode = parsedAuthCode.data;
 
     if (authCode.client_id !== client_id) {
-        return c.json({ error: "invalid_authorization_code_client_id" }, 400);
+        return c.json(
+            { error: "invalid_grant", error_description: "client_id mismatch" },
+            400
+        );
     }
 
     if (authCode.redirect_uri !== redirect_uri) {
         return c.json(
-            { error: "invalid_authorization_code_redirect_uri" },
+            {
+                error: "invalid_grant",
+                error_description: "redirect_uri mismatch",
+            },
             400
         );
     }
@@ -77,7 +95,13 @@ async function handleAuthorizationCodeGrant(
         .update(code_verifier)
         .digest("base64url");
     if (verifierHash !== authCode.code_challenge) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json(
+            {
+                error: "invalid_grant",
+                error_description: "code_verifier mismatch",
+            },
+            400
+        );
     }
 
     await c.env.AUTH_KV_AUTHCODES.delete(code);
@@ -210,7 +234,13 @@ async function handleRefreshTokenGrant(
     // Validate refresh token
     const rawRefreshData = await c.env.AUTH_KV_REFRESHTOKENS.get(refresh_token);
     if (!rawRefreshData) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json(
+            {
+                error: "invalid_grant",
+                error_description: "refresh token is invalid or expired",
+            },
+            400
+        );
     }
 
     let refreshData;
@@ -218,15 +248,30 @@ async function handleRefreshTokenGrant(
         const parsed = JSON.parse(rawRefreshData);
         const result = RefreshTokenDataSchema.safeParse(parsed);
         if (!result.success) {
-            return c.json({ error: "invalid_grant" }, 400);
+            return c.json(
+                {
+                    error: "invalid_grant",
+                    error_description: "refresh token data is malformed",
+                },
+                400
+            );
         }
         refreshData = result.data;
     } catch (_e) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json(
+            {
+                error: "invalid_grant",
+                error_description: "refresh token data is malformed",
+            },
+            400
+        );
     }
 
     if (refreshData.client_id !== client_id) {
-        return c.json({ error: "invalid_grant" }, 400);
+        return c.json(
+            { error: "invalid_grant", error_description: "client_id mismatch" },
+            400
+        );
     }
 
     let newGoogleAccessToken = undefined;
