@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { signOAuthStateParam } from "@/lib/auth/oauth-callback";
 import { validateClient } from "@/lib/clients/validate";
 import { createAppleClient, createGoogleClient } from "@/lib/oauth";
+import { parseJsonWithSchema } from "@/lib/safe-json";
 import type { AuthCode } from "@/lib/schemas/authcode";
 import { AuthorizeQuerySchema } from "@/lib/schemas/authorize";
 import { type Session, SessionSchema } from "@/lib/schemas/session";
@@ -56,10 +57,7 @@ app.get("/", async (c) => {
     if (sid) {
         const sessionData = await c.env.AUTH_KV_SESSIONS.get(sid);
         if (sessionData) {
-            const parsed = SessionSchema.safeParse(JSON.parse(sessionData));
-            if (parsed.success) {
-                session = parsed.data;
-            }
+            session = parseJsonWithSchema(SessionSchema, sessionData);
         }
     }
 

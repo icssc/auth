@@ -5,9 +5,11 @@ import {
     verifyOAuthCallbackState,
 } from "@/lib/auth/oauth-callback";
 import { createAppleClient } from "@/lib/oauth";
+import { parseJsonWithSchema } from "@/lib/safe-json";
 import { AppleProfileSchema, AppleUserSchema } from "@/lib/schemas/apple-user";
 import type { AuthCode } from "@/lib/schemas/authcode";
-import { tryCatch, tryCatchSync } from "@/lib/try-catch";
+import type { Session } from "@/lib/schemas/session";
+import { tryCatch } from "@/lib/try-catch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -57,45 +59,41 @@ app.post("/", async (c) => {
 
     let userName = claims.email;
     let userEmail = claims.email;
+    let hasUserData = false;
 
     if (userParam) {
-        const userResult = tryCatchSync(() => JSON.parse(userParam));
-        if (!userResult.error && userResult.data) {
-            const parsed = AppleUserSchema.safeParse(userResult.data);
-            if (parsed.success) {
-                const appleUser = parsed.data;
-                if (appleUser.name) {
-                    const parts = [
-                        appleUser.name.firstName,
-                        appleUser.name.lastName,
-                    ].filter(Boolean);
-                    if (parts.length > 0) {
-                        userName = parts.join(" ");
-                    }
+        const appleUser = parseJsonWithSchema(AppleUserSchema, userParam);
+        if (appleUser) {
+            hasUserData = true;
+            if (appleUser.name) {
+                const parts = [
+                    appleUser.name.firstName,
+                    appleUser.name.lastName,
+                ].filter(Boolean);
+                if (parts.length > 0) {
+                    userName = parts.join(" ");
                 }
-                if (appleUser.email) {
-                    userEmail = appleUser.email;
-                }
+            }
+            if (appleUser.email) {
+                userEmail = appleUser.email;
             }
         }
     }
 
     const profileKey = `apple_profile:${claims.sub}`;
     const existingProfile = await c.env.AUTH_KV_USERS.get(profileKey);
+    const storedProfile = existingProfile
+        ? parseJsonWithSchema(AppleProfileSchema, existingProfile)
+        : null;
 
-    if (userParam || !existingProfile) {
+    if (hasUserData || !storedProfile) {
         await c.env.AUTH_KV_USERS.put(
             profileKey,
             JSON.stringify({ name: userName, email: userEmail })
         );
     } else {
-        const parsed = AppleProfileSchema.safeParse(
-            JSON.parse(existingProfile)
-        );
-        if (parsed.success) {
-            userName = parsed.data.name;
-            userEmail = parsed.data.email;
-        }
+        userName = storedProfile.name;
+        userEmail = storedProfile.email;
     }
 
     const sessionData = {
@@ -104,7 +102,7 @@ app.post("/", async (c) => {
         name: userName,
         provider: "apple" as const,
         scope: stateData.scope,
-    };
+    } satisfies Session;
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;
     const codeTtl =

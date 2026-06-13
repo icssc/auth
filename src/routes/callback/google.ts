@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth/oauth-callback";
 import { createGoogleClient } from "@/lib/oauth";
 import type { AuthCode } from "@/lib/schemas/authcode";
+import type { Session } from "@/lib/schemas/session";
 import { tryCatch } from "@/lib/try-catch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -66,7 +67,7 @@ app.get("/", async (c) => {
         google_refresh_token: googleRefreshToken,
         google_token_expiry: googleTokenExpiry,
         scope: stateData.scope,
-    };
+    } satisfies Session;
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;
     const codeTtl =
