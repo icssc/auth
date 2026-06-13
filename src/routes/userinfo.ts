@@ -61,10 +61,10 @@ app.get("/", async (c) => {
     const scopes = tokenData.scope.split(" ");
     const response: Record<string, string | undefined> = {
         sub: tokenData.user_id,
-        picture: tokenData.picture,
     };
     if (scopes.includes("profile")) {
         response.name = tokenData.name;
+        response.picture = tokenData.picture;
     }
     if (scopes.includes("email")) {
         response.email = tokenData.email;
