@@ -83,6 +83,7 @@ app.get("/", async (c) => {
         redirect_uri: stateData.redirect_uri,
         code_challenge: stateData.code_challenge,
         scope: stateData.scope,
+        nonce: stateData.nonce,
         created_at: Date.now(),
         google_access_token: googleAccessToken,
         google_refresh_token: googleRefreshToken,

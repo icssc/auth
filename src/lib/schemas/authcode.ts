@@ -9,6 +9,7 @@ const BaseAuthCode = z.object({
     redirect_uri: z.string(),
     code_challenge: z.string(),
     scope: z.string(),
+    nonce: z.string().min(1).optional(),
     created_at: z.number(),
 });
 

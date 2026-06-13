@@ -4,6 +4,7 @@ const BaseStateInner = z.object({
     client_id: z.string(),
     redirect_uri: z.string(),
     state: z.string().optional(),
+    nonce: z.string().min(1).optional(),
     code_challenge: z.string(),
     scope: z.string(),
 });

@@ -8,6 +8,7 @@ export const AuthorizeQuerySchema = z.object({
     redirect_uri: z.string().url(),
     scope: z.string(),
     state: z.string().optional(),
+    nonce: z.string().min(1).optional(),
     code_challenge: z.string(),
     code_challenge_method: z.literal("S256"),
     prompt: z.enum(["none", "consent"]).optional(),
