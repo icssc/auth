@@ -106,6 +106,7 @@ async function handleAuthorizationCodeGrant(
         iss: c.env.ISSUER,
         iat: now,
         exp: now + Number.parseInt(c.env.TOKEN_TTL_SECONDS.toString(), 10),
+        ...(authCode.nonce ? { nonce: authCode.nonce } : {}),
     })
         .setProtectedHeader({ alg: "RS256", kid: keypair.kid })
         .sign(privateKey);

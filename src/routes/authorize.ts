@@ -21,6 +21,7 @@ app.get("/", async (c) => {
         client_id,
         redirect_uri,
         state,
+        nonce,
         code_challenge,
         scope,
         prompt,
@@ -88,6 +89,7 @@ app.get("/", async (c) => {
                     redirect_uri,
                     code_challenge,
                     scope,
+                    nonce,
                     created_at: Date.now(),
                     google_access_token: session.google_access_token,
                     google_refresh_token: session.google_refresh_token,
@@ -105,6 +107,7 @@ app.get("/", async (c) => {
                     redirect_uri,
                     code_challenge,
                     scope,
+                    nonce,
                     created_at: Date.now(),
                 };
                 break;
@@ -148,6 +151,7 @@ app.get("/", async (c) => {
                 client_id,
                 redirect_uri,
                 state,
+                nonce,
                 code_challenge,
                 scope,
                 code_verifier: codeVerifier,
@@ -179,6 +183,7 @@ app.get("/", async (c) => {
                 client_id,
                 redirect_uri,
                 state,
+                nonce,
                 code_challenge,
                 scope,
             };
