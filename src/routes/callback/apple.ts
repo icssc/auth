@@ -5,8 +5,11 @@ import {
     verifyOAuthCallbackState,
 } from "@/lib/auth/oauth-callback";
 import { createAppleClient } from "@/lib/oauth";
+import { parseJsonWithSchema } from "@/lib/safe-json";
+import { AppleProfileSchema, AppleUserSchema } from "@/lib/schemas/apple-user";
 import type { AuthCode } from "@/lib/schemas/authcode";
-import { tryCatch, tryCatchSync } from "@/lib/try-catch";
+import type { Session } from "@/lib/schemas/session";
+import { tryCatch } from "@/lib/try-catch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -56,14 +59,12 @@ app.post("/", async (c) => {
 
     let userName = claims.email;
     let userEmail = claims.email;
+    let hasUserData = false;
 
     if (userParam) {
-        const userResult = tryCatchSync(() => JSON.parse(userParam));
-        if (!userResult.error && userResult.data) {
-            const appleUser = userResult.data as {
-                name?: { firstName?: string; lastName?: string };
-                email?: string;
-            };
+        const appleUser = parseJsonWithSchema(AppleUserSchema, userParam);
+        if (appleUser) {
+            hasUserData = true;
             if (appleUser.name) {
                 const parts = [
                     appleUser.name.firstName,
@@ -81,19 +82,18 @@ app.post("/", async (c) => {
 
     const profileKey = `apple_profile:${claims.sub}`;
     const existingProfile = await c.env.AUTH_KV_USERS.get(profileKey);
+    const storedProfile = existingProfile
+        ? parseJsonWithSchema(AppleProfileSchema, existingProfile)
+        : null;
 
-    if (userParam || !existingProfile) {
+    if (hasUserData || !storedProfile) {
         await c.env.AUTH_KV_USERS.put(
             profileKey,
             JSON.stringify({ name: userName, email: userEmail })
         );
     } else {
-        const profile = JSON.parse(existingProfile) as {
-            name: string;
-            email: string;
-        };
-        userName = profile.name;
-        userEmail = profile.email;
+        userName = storedProfile.name;
+        userEmail = storedProfile.email;
     }
 
     const sessionData = {
@@ -102,7 +102,7 @@ app.post("/", async (c) => {
         name: userName,
         provider: "apple" as const,
         scope: stateData.scope,
-    };
+    } satisfies Session;
     const sessionTtl =
         Number.parseInt(c.env.SESSION_TTL_SECONDS.toString(), 10) || 86400;
     const codeTtl =

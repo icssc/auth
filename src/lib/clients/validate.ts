@@ -1,4 +1,4 @@
-import { clients, type Client } from "@/lib/clients/clients";
+import { type Client, clients } from "@/lib/clients/clients";
 import {
     matchesPostLogoutOrigin,
     matchesRedirectUri,
