@@ -29,6 +29,17 @@ app.get("/", async (c) => {
 
     const scopes = scope.split(" ");
 
+    if (!scopes.includes("openid")) {
+        return c.json(
+            {
+                error: "invalid_scope",
+                error_description:
+                    "OpenID Connect requests must contain the openid scope value",
+            },
+            400
+        );
+    }
+
     if (
         provider !== "google" &&
         scopes.some((s) => s.startsWith("https://www.googleapis.com/"))
