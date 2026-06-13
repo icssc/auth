@@ -51,8 +51,6 @@ app.get("/", async (c) => {
         return c.json({ error: "unauthorized_client" }, 400);
     }
 
-    // From here on, redirect_uri is validated — errors are returned
-    // via redirect per OIDC Core §3.1.2.6.
     const scopes = scope.split(" ");
 
     if (
