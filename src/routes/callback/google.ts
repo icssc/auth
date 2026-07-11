@@ -14,11 +14,7 @@ const app = new Hono<{ Bindings: CloudflareBindings }>();
 app.get("/", async (c) => {
     const { code, state: stateParam, error } = c.req.query();
 
-    if (error) {
-        return c.json({ error: "google_oauth_error", description: error }, 400);
-    }
-
-    if (!code || !stateParam) {
+    if (!stateParam) {
         return c.json({ error: "invalid_request" }, 400);
     }
 
@@ -32,6 +28,16 @@ app.get("/", async (c) => {
     }
 
     const stateData = stateResult.state;
+
+    if (error) {
+        const redirectUrl = new URL(stateData.redirect_uri);
+        redirectUrl.searchParams.set("error", error);
+        return c.redirect(redirectUrl, 302);
+    }
+
+    if (!code) {
+        return c.json({ error: "invalid_request" }, 400);
+    }
 
     const google = createGoogleClient(c.env);
     const { data: tokens, error: tokenError } = await tryCatch(
