@@ -24,10 +24,9 @@ As the setup steps will make changes to tracked files, consider making a new loc
 ### Setting up Google Auth
 1. Create your own Google client with a personal account in the [cloud console](https://cloud.google.com/cloud-console)
     - Instructions are [available online](https://support.google.com/cloud/answer/15544987?hl=en)
-    - Add your own email(s) as "test users"
     - Be sure to save the credentials given to your project (client ID and secret)
 2. Update `wrangler.jsonc`
-    - Replace any mention of `https://auth.icssc.club/` with `http://localhost:8787`
+    - Replace any mention of `https://auth.icssc.club` with `http://localhost:8787`
     - Update `GOOGLE_CLIENT_ID` to be yours
 3. Update `.dev.vars`
     - Update `GOOGLE_CLIENT_SECRET` to be yours
@@ -35,4 +34,4 @@ As the setup steps will make changes to tracked files, consider making a new loc
 
 ### Troubleshooting
 When initially running, you may find that `KvNamespace` is empty, causing an error in the POST `/token` route.
-- To fix this, simply go to `http://localhost:8787/jwks.json` in your browser, which will initially seed `AUTH_KV_KEYS`
+- To fix this, simply go to `http://localhost:8787/jwks.json` in your browser, which will seed `AUTH_KV_KEYS`
