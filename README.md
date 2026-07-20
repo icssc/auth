@@ -16,7 +16,7 @@ When contributing to our projects, you typically only need to use the official d
 
 ### Initial setup
 As the setup steps will make changes to tracked files, consider making a new local branch first so you don't lose your changes.
-1. Run `pnpm i`. You will need to accept builds
+1. Run `pnpm i`
 2. Copy `.dev.vars.example` to `.dev.vars`
 3. Run locally: `pnpm dev -- --local`. Without the local flag, wrangler will assume you're trying to run this on Cloudflare.
     - You most likely will have to set up Google or Apple auth (see below) to actually test anything
