@@ -30,7 +30,7 @@ As the setup steps will make changes to tracked files, consider making a new loc
     - Update `GOOGLE_CLIENT_ID` to be yours
 3. Update `.dev.vars`
     - Update `GOOGLE_CLIENT_SECRET` to be yours
-    - Generate an HMAC key for `STATE_SIGNING_SECRET`
+    - [Generate](https://www.random.org/strings/) an HMAC key for `STATE_SIGNING_SECRET`
 
 ### Troubleshooting
 When initially running, you may find that `KvNamespace` is empty, causing an error in the POST `/token` route.
