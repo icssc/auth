@@ -37,6 +37,7 @@ export const clients: Record<string, Client> = {
             "https://www.antalmanac.com",
             "https://staging-shared.antalmanac.com",
             "https://scheduler-*.antalmanac.com",
+            "https://staging-*.antalmanac.com",
         ],
         oauthPaths: ["/api/auth/oauth2/callback/icssc"],
     }),
@@ -52,6 +53,7 @@ export const clients: Record<string, Client> = {
             "https://www.antalmanac.com",
             "https://staging-shared.antalmanac.com",
             "https://planner-*.antalmanac.com",
+            "https://staging-*.antalmanac.com",
         ],
         oauthPaths: [
             "/planner/api/users/auth/google/callback",
